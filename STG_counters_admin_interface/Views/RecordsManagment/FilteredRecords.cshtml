@@ -1,0 +1,102 @@
+﻿@model IEnumerable<PaRecords>
+
+
+
+
+
+	@if (Model != null )
+	{
+    <form id="pageform" method="post" class="form-inline d-inline-block">
+        <input type="hidden" name="selectedItems" id="selectedItems" value="@ViewBag.selected_Items" />
+        <input type="hidden" name="start_Date" id="start_Date" value="@ViewBag.start_Date" />
+        <input type="hidden" name="end_Date" id="end_Date" value="@ViewBag.end_Date" />
+
+
+        <input type="hidden" name="showWrongRecords" id="showWrongRecords" value="@ViewBag.showWrongRecords" />
+
+        @*<script type="text/javascript">
+            $('#selectedItems').val(ViewBag.selectedItems)
+        </script>*@
+        @Html.PartialAsync("Pages", Model).Result
+       @* @Html.Partial("ExcelExport", Model)*@
+    </form>
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>
+					Имя устройства
+				</th>
+				<th>
+					Дата записи
+				</th>
+				<th>
+					Данные по устройству
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+
+			@foreach (PaRecords record in Model)
+			{
+
+
+				<tr>
+					<td>
+
+						@record.Id.IdDeviceNavigation.DeviceName
+					</td>
+					<td>
+						@record.RecordTime
+					</td>
+					<td>
+						@if (record.PaData != null)
+
+						{
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th>
+											ID параметра
+										</th>
+
+										<th>
+											Значение измерения
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach (PaData data in record.PaData)
+									{
+										<tr>
+											<td>
+												@foreach (PaAdapterParameters adapterParameter in record.Id.PaAdapterParameters)
+												{
+													@if (adapterParameter.IdParameter == data.IdParameter)
+													{
+														@adapterParameter.ParameterName
+													}
+												}
+												@*@data.IdParameter*@
+											</td>
+											<td>
+												@data.MeasureValue
+											</td>
+										</tr>
+
+
+
+									}
+								</tbody>
+							</table>
+						}
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+
+	}
+	else
+	{ <h5 class="text-center">Не найдено записей удовлетворяющих условию</h5>}
+
+

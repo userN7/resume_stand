@@ -1,0 +1,21 @@
+﻿
+<form asp-action="Logs" method="post">
+	@Html.PartialAsync("Time_Filters").Result
+	<select class="custom-select w-25" id="log_name" name="log_name" value="1">
+		<optgroup label="Логи">
+			<option value="ReportsRunHistory">История запусков отчетов</option>
+			<option value="BackgroundTasks">История запусков background tasks</option>
+		</optgroup>
+	</select>
+	<br>
+	<br>
+	<input type="submit" class="btn btn-primary" value="Вывести записи" />
+</form>
+<br />
+<br />
+@if (ViewBag.Json != null)
+{
+	@Html.PartialAsync("JStree_search").Result
+	@Html.PartialAsync("JStree").Result
+
+}

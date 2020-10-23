@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29306.81
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "STG_counters_admin_interface", "STG_counters_admin_interface\STG_counters_admin_interface.csproj", "{F657A204-7B7E-4D16-A305-66F6716DCF64}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F657A204-7B7E-4D16-A305-66F6716DCF64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F657A204-7B7E-4D16-A305-66F6716DCF64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F657A204-7B7E-4D16-A305-66F6716DCF64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F657A204-7B7E-4D16-A305-66F6716DCF64}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {451B43B7-2E58-4C29-BAEA-43A8DE197ACC}
+	EndGlobalSection
+EndGlobal

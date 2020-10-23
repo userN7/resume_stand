@@ -1,0 +1,26 @@
+﻿@model ReportInfo
+@if (@ViewBag.Excel_export_message_list != null)
+{
+
+	@foreach (var err in @ViewBag.Excel_export_message_list)
+	{
+		<script type="text/javascript">
+        alert('@Html.Raw(err)');
+		</script>
+	}
+}
+<form action="ShowReport" method="post" id="excelForm">
+	@{ int tesYear = (Model.ReportDates.TesYear != 0) ? Model.ReportDates.TesYear : DateTime.Now.Year;}
+
+	<input type="hidden" name="start_Date" id="start_Date" value="@Model.ReportDates.StartDate" />
+	<input type="hidden" name="end_Date" id="end_Date" value="@Model.ReportDates.EndDate" />
+	<input type="hidden" name="report_name" id="report_name" value="@Model.ReportName.Full" />
+	<input type="hidden" name="tesYear" id="tesYear" value="@tesYear" />	
+	<input type="hidden" name="selectedSortOfProduction" id="selectedSortOfProduction" value="@Model.SelectedSortOfProduction" />
+	
+	<button name="export_excel" id="send_excel" value="1" type="submit" onclick="ExportExcelFunc(event)"
+			class="btn btn-outline-primary ">
+		Экспорт в эксель
+	</button>
+</form>
+<br />

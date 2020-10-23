@@ -1,0 +1,93 @@
+﻿@model ReportInfo
+@if (Model.Records != null&&Model.Records.Count>0)
+{
+	@Html.PartialAsync("Reports_Attributes").Result
+	@Html.PartialAsync("ExcelExport").Result
+	var records = Model.Records.Select(r => (ConsumptionByBDMbyHour)r); 
+	<table class="table table-striped text-center">
+		<thead>
+			<tr>
+				<th>
+					Начало периода
+				</th>
+
+
+				<th>
+					Конец периода
+				</th>
+				<th>
+					Объект
+				</th>
+				<th>
+					Вид продукции
+				</th>
+
+				<th>
+					Э/Энергия, МВт*ч
+				</th>
+				
+				<th>
+					Газ, тыс.м3
+				</th>
+				<th>
+					Пар, ГКал
+				</th>
+				<th>
+				Ср. скорость
+				</th>
+				</tr>
+
+		</thead>
+		<tbody>
+			@foreach (var item in records)
+			{
+				<tr>
+					<td>
+						@item.StartPeriod.ToShortDateString() @item.StartPeriod.ToShortTimeString()
+					</td>
+					<td>
+						@item.EndPeriod.ToShortDateString() @item.EndPeriod.ToShortTimeString()
+					</td>
+
+					<td>
+						@item.Place
+					</td>
+
+					<td>
+						@item.Composition
+					</td>
+
+					<td>
+						@item.EnergyConsumption
+					</td>
+					
+					<td>
+						@item.GasConsumption
+					</td>
+					<td>
+						@item.SteamConsumption
+					</td>
+					<td>
+						@item.AverageSpeed
+					</td>
+				</tr>
+			}
+			
+			<tr><td></td><td></td><td></td>
+				<td><b>Итого:</b></td>
+			@{var sums = Model.Sums.Values.FirstOrDefault();}
+			@if (sums.Length>0)
+			{
+				@foreach (var sum in sums)
+				{
+				<td><b>@sum</b></td>
+				}
+			}
+			</tr>
+		</tbody>
+	</table>
+}
+else
+{<h5 class="text-center">Не найдено записей удолетворяющих условию</h5>}
+
+

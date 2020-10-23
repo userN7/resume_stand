@@ -1,0 +1,121 @@
+﻿@model List<PaRecordsByFilter>
+@using Newtonsoft.Json;
+
+
+@if (Model != null)
+{
+	//сериализуем записи для передачи в метод если нужно добавлять записи
+	string serializedModel = "";
+
+	if (ViewBag.Current_action == "AddGroupRecordsByStatus")
+	{
+		serializedModel = JsonConvert.SerializeObject(Model);
+
+	}
+
+
+	<form method="post" asp-action="@ViewBag.Current_action">
+		<label>Среднее значение для постановки</label>
+		<input type="text" class="col-1 input-group-text" name="avarageValue" id="avarageValue" value="0" />
+		<br />
+		<label>Множитель(запятая для дробной части)</label>
+		<input type="text" class="col-1 input-group-text" name="multiplier" id="multiplier" value="0" />
+		<br />
+		<input type="submit" class="btn btn-primary" id="GroupSubmit" onclick="getCheckedCheckBoxes()" value="Изменить выделенные" />
+		<input type="text" hidden name="start_Date" value="@ViewBag.start_Date">
+		<input type="text" hidden name="end_Date" value="@ViewBag.end_Date">
+		<input type="hidden" name="selectedItems" id="selectedItems" />
+		<input type="hidden" name="selectedItemsToAdd" id="selectedItemsToAdd" />
+		<input type="hidden" name="searchOption" id="searchOption" value="@ViewBag.searchOption" />
+		<input type="hidden" name="serializedModel" value="@serializedModel" />
+		<input type="hidden" name="device_id" value="@ViewBag.device_id" />
+		
+	</form>
+
+	<br />
+	@if (ViewBag.result_edit != null)
+	{
+		<h4 style="color:rebeccapurple">Записи изменены успешно!</h4>
+	}
+
+	@if (ViewBag.result_add != null)
+	{
+		<h4 style="color:rebeccapurple">Записи успешно добавлены!</h4>
+	}
+	<br />
+	<label>Поиск: </label>
+	<input type="text" id="jstree_search" />
+	<br />
+	<br />
+	<label>Записи с @ViewBag.start_Date по @ViewBag.end_Date</label>
+	<div id="jstree"></div>
+
+	<script type="text/javascript">
+        $(function () {
+            $('#jstree').on('changed.jstree', function (e, data) {
+
+				var i, j;
+
+				@*В  ид узла записано "PaRecordsByFilter.ID-PaRecordsByFilter.ID_RECORD" первая часть нужна для добавляния отсутствующих записей
+					, а втроая для изменения существующих*@
+				var ID_records_range_to_edit = "";
+
+				var ID_records_range_to_add = "";
+				for (i = 0, j = data.selected.length; i < j; i++) {
+
+					//Fetch the Id.
+					var id = data.selected[i];
+
+					//если не коренной узел, то добавляем в список выделенных устройств
+					if (id.indexOf('-') != -1) {
+						//Remove the ParentId.
+						id_to_edit = id.split("-")[1];
+						id_to_add = id.split("-")[0];
+						if (i + 1 != j) {
+							ID_records_range_to_edit = ID_records_range_to_edit + id_to_edit + ",";
+							ID_records_range_to_add = ID_records_range_to_add + id_to_add + ",";
+						}
+						else {
+							ID_records_range_to_edit = ID_records_range_to_edit + id_to_edit;
+							ID_records_range_to_add = ID_records_range_to_add + id_to_add;
+						}
+					}
+				}
+
+				$('#selectedItems').val(ID_records_range_to_edit);
+				$('#selectedItemsToAdd').val(ID_records_range_to_add);
+
+
+            }).jstree({
+                "core": {
+                    "themes": {
+						"variant": "large",
+						"icons": false
+                    },
+                    "data": @Html.Raw(ViewBag.Json)
+                    },
+                "checkbox": {
+                    "keep_selected_style": false
+				},
+				//плугины:
+				//wholerow - убирает черточки рисующие дерево,
+				//checkbox- реализация чекбоксов,
+				//search - реализация поиска
+                "plugins": ["wholerow", "checkbox","search"],
+			});
+			//Реализуем поиск при введении в input строки для поиск,
+			//каждые 250 миллисекунд, реализуется новый поиск на основе введенного текста
+  var to = false;
+  $('#jstree_search').keyup(function () {
+    if(to) { clearTimeout(to); }
+    to = setTimeout(function () {
+      var v = $('#jstree_search').val();
+      $('#jstree').jstree(true).search(v);
+    }, 250);
+  });
+		});
+	function getCheckedCheckBoxes() {
+
+	}
+	</script>
+}

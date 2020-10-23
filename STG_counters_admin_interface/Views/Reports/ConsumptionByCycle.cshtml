@@ -1,0 +1,193 @@
+﻿@*<div class="text-center text-danger">Данный отчет использует кэшированные данные, они обновляются раз в час</div>*@
+<div class="text-center text-danger">Правильно заполняйте места откуда считаются данные, иначе они в отчет не попадут</div>
+<br />
+<br />
+
+
+
+@model ReportInfo //List<ConsumptionByCycleOfProduction>
+
+@if (Model.Records?.Count>0 )
+{
+	var selectedSortOfProduction = Model.SelectedSortOfProduction;
+	
+	var records = Model.Records.Select(r =>r);
+	@Html.PartialAsync("Reports_Attributes").Result
+
+
+
+	@Html.PartialAsync("ExcelExport").Result
+
+
+
+
+
+
+
+	<table class="table table-striped text-center w-auto">
+		<thead>
+			<tr>
+				<th>
+					Дата начала цикла
+				</th>
+				<th>
+					Дата окончания цикла
+				</th>
+
+				<th>
+					Объект
+				</th>
+				<th>
+					Продолжительность
+				</th>
+				<th>
+					
+					<form action="ShowReport" method="post" name="SortOfProdForm">
+						<select class="custom-select w-auto font-weight-bold" id="select_selectedSortOfProduction" name="selectedSortOfProduction" onchange="fireSubmit(event)">
+							<option value="" selected disabled>Вид продукции</option>
+							@Html.Raw(@"<option value=""All""" + (selectedSortOfProduction == "All" ? " selected " : "") + ">Вся продукция за период</option>");
+							@foreach (string item in Model.ListSortOfProd)
+							{
+								@Html.Raw(@"<option value=""" + item + @"""" + (item == selectedSortOfProduction ? " selected " : "") + ">"+item+"</option>");
+							}
+
+						</select>
+
+						<input type="hidden" name="start_Date" id="start_Date" value="@Model.ReportDates.StartDate" />
+						<input type="hidden" name="end_Date" id="end_Date" value="@Model.ReportDates.EndDate" />
+						<input type="hidden" name="report_name" id="report_name" value="@Model.ReportName.Full" />
+
+					</form>
+				</th>
+				<th>
+					Объем БО, тонн
+				</th>
+				<th>
+					Э/Энергия, МВт*ч
+				</th>
+
+				<th>
+					Энергоемкость, МВт*ч/тонна
+				</th>
+				<th>
+					Газ, тыс.м3
+				</th>
+				<th>
+					Потребление газа, тыс.м3/тонна
+				</th>
+				<th>
+					Пар, ГКал
+				</th>
+
+
+
+				<th>
+					Потребление пара, ГКал/тонна
+				</th>
+				<th>
+					Ср. скорость
+				</th>
+		</thead>
+		<tbody>
+			@foreach (ConsumptionByCycleOfProduction item in Model.Records)
+			{
+				<tr>
+					<td>
+						@item.CycleDateBegin.ToString()
+					</td>
+
+					<td>
+						@item.CycleDateEnd.ToString()
+					</td>
+					<td>
+						@item.Place
+					</td>
+					<td>
+						@*Форматируем интервал в человекочитаемый текст*@
+						@Html.Raw(STG_counters_admin_interface.Models.StaticMethods.RightTimeString(item.CycleDateEnd - item.CycleDateBegin))
+
+
+
+					</td>
+					<td>
+						@item.SortofProduction
+					</td>
+					<td>
+						@item.CapacityOfBO
+					</td>
+					<td>
+						@item.EnergyConsumption
+					</td>
+
+					<td>
+						@item.EnergyConsumptionPerTonne
+					</td>
+					<td>
+						@item.GasConsumption
+					</td>
+					<td>
+						@item.GasConsumptionPerTonne
+					</td>
+					<td>
+						@item.SteamConsumption
+
+
+
+					<td>
+						@item.SteamConsumptionPerTonne
+					</td>
+					<td>
+						@item.AverageSpeed
+					</td>
+				</tr>
+			}
+			<tr class="font-weight-bold">
+				<td></td>
+				<td>Итого:</td>
+				<td></td>
+				<td>
+					@* Посчитываем итоговое количество времени *@
+					@Html.Raw(STG_counters_admin_interface.Models.StaticMethods.RightTimeString(@Model.Records.Select(m => (((ICycleDate)m).CycleDateEnd - ((ICycleDate)m).CycleDateBegin)).Aggregate(TimeSpan.Zero,
+				(sumSoFar, nextMyObject) => sumSoFar + nextMyObject)))
+				</td>
+				<td></td>
+				@if (Model.Sums.ContainsKey("ConsumptionByCycleByBDM"))				
+						
+				{
+
+
+					@* Выводим зарание посчитаные итоги *@
+					@foreach (double sum in Model.Sums["ConsumptionByCycleByBDM"])
+					{
+					<td>
+						@sum
+					</td>
+					}
+				}
+
+			</tr>
+		</tbody>
+	</table>
+	<script type="text/javascript">
+		fireSubmit = function (event) {
+			document.forms["SortOfProdForm"].submit();
+
+		};
+
+		ExportExcelFunc = function (event) {
+			inp = document.createElement('input');
+
+			inp.type = 'hidden';
+
+			inp.name = 'selectedSortOfProduction';
+			inp.value = $('#select_selectedSortOfProduction').val();
+			
+			//alert($('#select_selectedSortOfProduction').val());
+			//inp2.id = 'input_2';
+			document.getElementById('excelForm').appendChild(inp);
+		};
+		//alert('!');
+	</script>
+}
+else
+{<h5 class="text-center">Не найдено записей удолетворяющих условию</h5>}

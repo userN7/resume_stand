@@ -1,0 +1,77 @@
+﻿@model ReportInfo
+
+@*<div class="text-center text-danger">Правильно заполняйте места откуда считаются данные, иначе они в отчет не попадут</div>*@
+<br />
+<br />
+@if (Model != null)
+{
+	@Html.PartialAsync("Reports_Attributes").Result
+
+	var Places = Constants.places;
+	var sums = Model.Sums.FirstOrDefault().Value;
+
+	var additional_data = Constants.ConsumptionByManufactureByPeriod_additional_data;
+
+	@Html.PartialAsync("ExcelExport").Result
+
+		<table class="table table-bordered table-striped">
+		<thead class="text-center">
+			<tr>
+				@foreach (var h in Constants.ConsumptionByManufactureByPeriod_header)
+				{
+					<th>@h</th>
+				}
+				
+			
+				@foreach (var item in Places)
+{
+			<th>
+				@item.Key
+			</th>
+}
+				<th>
+					Всего
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+
+
+			@for (int i = 0; i < @Model.Records_List.Count; i++)
+			{
+			<tr>
+				@foreach (var s in additional_data[i])
+				{
+					<td>@s</td>
+				}
+				<td>
+					@StaticMethods.FormPeriodString(Model.ReportDates.StartDate, Model.ReportDates.EndDate)
+
+				</td>
+				@*Отдельно "БДМ-1 минус мак.уч."*@
+				@*<td>@(Model.Values.ElementAt(i)[1]-Model.Values.ElementAt(i)[0])</td>*@
+
+				@for (int j = 0; j < Model.Records_List.Values.ElementAt(i).Count; j++)
+				{
+
+					//Выделяем последнюю колонку 
+					<td @Html.Raw((j == Model.Records_List.Values.ElementAt(i).Count - 1) ? "class='font-weight-bold'" : "")>
+						@Model.Records_List.Values.ElementAt(i)[j]
+					</td>
+					
+
+				}
+				@*@foreach (var d in Model.Records_List.Values.ElementAt(i))
+		{
+			<td>@d</td>
+		}*@
+				@*<td>@sums.Values.ElementAt(i)</td>*@
+			</tr>
+			}
+
+
+
+				
+			</tbody>
+	</table>
+}

@@ -1,0 +1,98 @@
+﻿@using System.Reflection
+@using static STG_counters_admin_interface.Models.Constants
+@model List<StgPlanTer>
+@{var startDisplayColumn = 5;//Номер члена класса StgPlanTer  с которой начинается отображение в таблице
+	var columns_head_list = Plan_TER_columns_head_list; 
+	//Собираем иноформацию о членов класса переданном в перечислителе
+	FieldInfo[] myFieldInfo = typeof(StgPlanTer).GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
+
+	//Собираем имена для input для колонок
+	var columns_names_list = typeof(StgPlanTer).GetProperties().Select(f => f.Name).ToList();
+	var sku = (string)ViewBag.sku;
+	}
+
+@if (Model != null)
+{
+
+
+	<table class="table table-bordered table-striped">
+		<thead>
+			<tr>
+				<th>Год</th>
+				<th>
+					SKU
+				</th>
+				<th>
+					Передел
+				</th>
+				<th>
+				План
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			@{var list_place_names = (Dictionary<int, string>)ViewData["list_place_names"];}
+			@foreach (var SKU_year in Model.Select(r => new { r.Year, r.Sku, r.PlaceId }).Distinct())
+			{
+
+				<tr>
+					<td>
+						@SKU_year.Year
+					</td>
+					<td>
+						@SKU_year.Sku
+					</td>
+
+					<td>
+						@list_place_names[SKU_year.PlaceId]
+					</td>
+
+					<td>
+						<table class="table table-bordered table-striped">
+							<thead class="text-center">
+								@foreach (var item in columns_head_list)
+								{
+								<th>@item</th>
+							}
+								</thead>
+								<tbody>
+
+
+
+
+									@foreach (var item in Model.Where(r => r.Sku == SKU_year.Sku && r.Year == SKU_year.Year && r.PlaceId == SKU_year.PlaceId))
+									{
+										<tr>
+
+											<td>
+
+												@item.Month
+											</td>
+											@for (int c = startDisplayColumn; c < myFieldInfo.Length; c++)
+											{
+												<td>
+													@myFieldInfo[c].GetValue(item)
+												</td>
+
+											}
+
+										</tr>
+
+									}
+
+								</tbody>
+
+
+
+							</table>
+						</td>
+					</tr>
+				}
+		</tbody>
+	</table>
+<br />
+}
+else
+{
+	<h4>Нет данных для отображения</h4>
+}

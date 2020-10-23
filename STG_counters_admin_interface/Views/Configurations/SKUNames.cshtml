@@ -1,0 +1,75 @@
+﻿
+@model IQueryable<StgSkuDictionary>
+
+<a asp-action="SKUNames_Reload_from_Gamma" class="btn btn-primary">
+	Догрузить SKU из Gamma
+</a>
+
+<br />
+<br />
+
+@Html.PartialAsync("ViewBagMassagesHandler").Result
+
+
+<br />
+<table class="table table-bordered table-striped">
+	<thead class="text-center">
+		<tr>
+			<th>
+				ID
+			</th>
+			<th>
+				Имя SKU в Gamma
+			</th>
+			<th>
+				Полное имя
+			</th>
+			<th>
+
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+
+		<form asp-action="SKUNames_Add" method="post">
+			<tr>
+				<td>
+				</td>
+				<td>
+					<input name="record.SkuName" type="text" />
+				</td>
+				<td>
+					<input name="record.SkuNameFullName" type="text" />
+
+				</td>
+				<td>
+					<button type="submit" class="btn btn-primary">Добавить</button>
+
+				</td>
+			</tr>
+		</form>
+
+		@foreach (var item in Model)
+		{
+			<form asp-action="SKUNames_Update" method="post">
+				<tr>
+					<td>
+						<input name="record.IdSkuDictionary" asp-for="@item.IdSkuDictionary" hidden readonly />
+						@item.IdSkuDictionary
+					</td>
+					<td>
+						<input name="record.SkuName" asp-for="@item.SkuName" />
+					</td>
+					<td>
+						<input name="record.SkuNameFullName" asp-for="@item.SkuNameFullName" />
+
+					</td>
+					<td>
+						<button type="submit" class="btn btn-primary">Изменить</button>
+						<a class="btn btn-secondary" asp-action="DeleteSKUName" asp-route-key="@item.IdSkuDictionary">Удалить</a>
+					</td>
+				</tr>
+			</form>
+		}
+	</tbody>
+</table>

@@ -1,0 +1,84 @@
+﻿<br />
+<label>Поиск: </label>
+<input type="text" id="jstree_search" />
+<br />
+<br />
+<div class="col-5" id="jstree">
+</div>
+<br />
+<script>
+	if (@ViewBag.Show_warning_unselected_devices) {
+		alert('Выберете устройства');
+	}
+</script>
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+        $(function () {
+            $('#jstree').on('changed.jstree', function (e, data) {
+
+				var i, j;
+                //var postedItems = [];
+				var ID_devices_range = "(";
+				for (i = 0, j = data.selected.length; i < j; i++) {
+
+                    //Fetch the Id.
+                    var id = data.selected[i];
+
+                    //если не коренной узел, то добавляем в список выделенных устройств
+                    if(id.indexOf('-') != -1){
+						//Remove the ParentId.
+						id = id.split("-")[1];
+						if (i + 1 != j) {
+							ID_devices_range = ID_devices_range + id + ",";
+						}
+						else { ID_devices_range = ID_devices_range + id + ")";}
+
+      //              //Add the Node to the JSON Array.
+      //              postedItems.push({
+      //                  text: data.instance.get_node(data.selected[i]).text,
+      //                  id: id,
+      //                  parent: data.node.parents[0]
+						//});
+					}
+                }
+
+				//ID_devices_range = ID_devices_range.Substring(0, ID_devices_range.Length - 1);
+				//ID_devices_range = ID_devices_range + ")";
+                //Serialize the JSON Array and save in HiddenField.
+                //$('#selectedItems').val(JSON.stringify(postedItems));
+				$('#selectedItems').val(ID_devices_range);
+            }).jstree({
+                "core": {
+                    "themes": {
+                        "variant": "large"
+                    },
+                    "data": @Html.Raw(ViewBag.Json)
+                    },
+                "checkbox": {
+                    "keep_selected_style": false
+				},
+				//плугины:
+				//wholerow - убирает черточки рисующие дерево,
+				//checkbox- реализация чекбоксов,
+				//search - реализация поиска
+                "plugins": ["wholerow", "checkbox","search"],
+			});
+			//Реализуем поиск при введении в input строки для поиск,
+			//каждые 250 миллисекунд, реализуется новый поиск на основе введенного текста
+  var to = false;
+  $('#jstree_search').keyup(function () {
+    if(to) { clearTimeout(to); }
+    to = setTimeout(function () {
+      var v = $('#jstree_search').val();
+      $('#jstree').jstree(true).search(v);
+    }, 250);
+  });
+        });
+</script>

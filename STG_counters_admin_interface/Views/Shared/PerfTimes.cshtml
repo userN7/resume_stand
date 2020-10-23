@@ -1,0 +1,9 @@
+﻿@*Выводим замеры скорости выполнения*@
+@{var perfTimes = (Dictionary<string, string>)ViewData["PerfTimes"];}
+@if (perfTimes != null)
+{
+	foreach (var item in perfTimes)
+	{
+		<h6>@item.Key: @item.Value</h6>
+	}
+}

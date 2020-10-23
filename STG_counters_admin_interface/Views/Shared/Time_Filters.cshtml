@@ -1,0 +1,39 @@
+﻿
+@*Для работы datepicker*@
+
+@*<script>
+	$("#datepicker1").datepicker($.datepicker.regional["ru"]);
+	$("#datepicker2").datepicker($.datepicker.regional["ru"]);</script>
+<script>
+	$(function () {
+		$("#datepicker1").datepicker();
+	});
+</script>
+<script>
+	$(function () {
+		$("#datepicker2").datepicker();
+	});
+</script>*@
+
+<div class="col-11">
+	<label> С даты: </label>
+	<input autocomplete="off" type="date" id="datepicker1" class="col-2 input-group-text w-auto" name="start_Date">
+	<br />
+	<label> по </label>
+	<input autocomplete="off" type="date" id="datepicker2" class="col-2 input-group-text" name="end_Date">
+</div>
+
+<br />
+@*<label>Период</label>
+<br />
+<select name="selectedPeriod" class="custom-select w-25">
+	<optgroup label="За последний период">
+		<option value="0">Не выбран</option>
+		<option value="1">Последний день</option>
+		<option value="7">Последние 7 дней</option>
+		<option value="30">Последние 30 дней</option>
+		<option value="90">Последние 90 дней</option>
+	</optgroup>
+</select>*@
+
+

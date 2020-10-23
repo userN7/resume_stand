@@ -1,0 +1,34 @@
+﻿<select class="custom-select w-auto " name="year_CopyTo">
+    <option value="" selected disabled>Год внесения</option>
+    @*Creating list of years for adding data*@
+    @{var list_of_years = new List<int>
+        {DateTime.Now.AddYears(-1).Year
+    ,DateTime.Now.Year
+    ,DateTime.Now.AddYears(1).Year}; }
+
+    @foreach (var item in list_of_years)
+    {
+        <option value="@item">
+            @item
+        </option>
+    }
+
+</select>
+
+
+
+<select class="custom-select w-auto" name="sku_CopyTo">
+    <option value="" selected disabled>Вид продукции</option>
+    @foreach (string item in Model)
+    {
+        <option value="@item">
+            @item
+        </option>
+    }
+
+</select>
+<select class="custom-select w-auto" name="PlaceId_CopyTo">
+    <option value="" selected disabled>Выберете БДМ</option>
+    <option value="1">БДМ-1</option>
+    <option value="2">БДМ-2</option>
+</select>

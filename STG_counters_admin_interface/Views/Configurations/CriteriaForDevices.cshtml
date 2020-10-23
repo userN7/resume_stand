@@ -1,0 +1,86 @@
+﻿@model IQueryable<StgCriteriaForDataFromDevices>
+
+@if (Model != null)
+{
+    <table class="table table-striped text-center">
+        <thead>
+            <tr>
+                <th>
+                    Название устройства
+                </th>
+                <th>
+                    Описание устройства
+                </th>
+                <th>
+                    Тип устройства
+                </th>
+                <th>
+                    Критерий мин. 
+                </th>
+                <th>
+                    Критерий макс.
+                </th>
+               
+                <th>
+
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+			@*Если есть эл. счетчики для добавления, то выводим строку для этого*@
+			@if (ViewBag.ListUnUsedDevices.Count>0)
+			{
+
+			
+			<tr>
+				<form action="AddCriteriaForDevices" method="post">
+					@{StgCriteriaForDataFromDevices new_criteria = new StgCriteriaForDataFromDevices();}
+					<td>
+						<select asp-for="@new_criteria.IdDevice" name="criteria.IdDevice">
+							@if (ViewBag.ListUnUsedDevices.Count > 0)
+							{
+								@foreach (KeyValuePair<int, string> device in ViewBag.ListUnUsedDevices)
+								{
+									<option value="@device.Key">@device.Value</option>
+								}
+							}
+							
+						</select>
+					</td>
+					<td></td>
+					<td></td>
+					<td><input asp-for="@new_criteria.MinParam" name="criteria.MinParam" value="0" /></td>
+					<td><input asp-for="@new_criteria.MaxParam" name="criteria.MaxParam" value="1000000" /></td>
+					
+					<td><input type="submit" value="Добавить устройство" class="btn btn-primary"/></td>
+				</form>
+			</tr>
+			}
+			@foreach (StgCriteriaForDataFromDevices criteria in Model)
+            {
+            <tr>
+                <td>
+                    @criteria.IdDeviceNavigation.DeviceName
+                </td>
+                <td>
+                    @criteria.IdDeviceNavigation.DeviceDescription
+                </td>
+                <td>
+                    @criteria.IdDeviceNavigation.DeviceTypeName
+                </td>
+                <td>
+                    @criteria.MinParam
+                </td>
+                <td>
+                    @criteria.MaxParam
+                </td>
+               
+                <td>
+                    <a asp-action="UpdateCriteria" asp-route-key="@criteria.IdCriteria">Редактировать критерии</a>
+                </td>
+            </tr>
+            }
+            
+        </tbody>
+    </table>
+ }

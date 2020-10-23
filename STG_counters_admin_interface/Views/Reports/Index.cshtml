@@ -1,0 +1,99 @@
+﻿@using System.Globalization;
+@model List<string>
+@if (ViewBag.Message_text != null)
+{
+	<h2 class="text-center" style="color:@ViewBag.Message_color"> @Html.Raw(ViewBag.Message_text)</h2>
+}
+@using (Html.BeginForm("ShowReport", "Reports", FormMethod.Post, new { id="ShowReport"}))
+{
+
+	@Html.PartialAsync("Time_Filters").Result
+	<br />
+	<br />
+	<label>Месяц</label>
+	<br />
+	<select name="selectedMonth" id="selectedMonth" class="custom-select w-25" onchange="DateCheck(event)">
+		<optgroup label="За месяц">
+			<option value="0">Выберете месяц</option>
+			@for (int i = 1; i <= 12; i++)
+			{
+				<option value="@i">@CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i)</option>
+			}
+		</optgroup>
+	</select>
+	<br />
+	<label>Год</label>
+	<br />
+	<select name="selectedYear" class="custom-select w-25">
+		<optgroup label="За год">
+			<option value="0">Выберете год</option>
+			@for (int i = 0; i <= 4; i++)
+			{
+				<option value="@DateTime.Now.AddYears(-i).Year"> @DateTime.Now.AddYears(-i).Year </option>
+			}
+		</optgroup>
+	</select>
+	<br />
+	<br />
+	<label>Вид продукции</label>
+	<br />
+	<select class="custom-select w-auto " id="select_selectedSortOfProduction" name="selectedSortOfProduction">
+		<option value="" selected disabled>Вид продукции</option>
+	@if (Model != null)
+	{
+		foreach (string item in Model)
+		{
+			<option value="@item">
+				@item
+			</option>
+		}
+	}
+	</select>
+
+	<br>
+	<br />
+
+	<label class="col-form-label">Отчеты</label>
+	<br>
+	<script>
+		onSelChange = function (event) {
+
+
+			if ($("#report_name option:selected").text() == 'Средневзвешенное ТЭР на тонну по циклам производства') document.getElementById("selYears").hidden = false
+			else document.getElementById("selYears").hidden = true
+
+
+
+		}
+	</script>
+	<select class="custom-select w-25" id="report_name" name="report_name" onchange="onSelChange(event)" value="1">
+		<optgroup label="Отчет">
+
+
+
+
+			<option value="ConsumptionByCycleByBDM1;БДМ-1 по видам продукции">БДМ-1 по видам продукции</option>
+			<option value="ConsumptionByCycleByBDM2;БДМ-2 по видам продукции">БДМ-2 по видам продукции</option>
+			<option value="TERperMonthperTonne;Средневзвешенное ТЭР на тонну по циклам производства">Средневзвешенное ТЭР на тонну по циклам производства</option>
+
+			<option value="EnergyConsumptionByManufactureByHour;Часовой расход электроэнергии по производству">Часовой расход электроэнергии по производству</option>
+			<option value="ConsumptionByBDM1ByDay;БДМ-1(Суточный)" onchange="">БДМ-1(Суточный)</option>
+			<option value="ConsumptionByBDM2ByDay;БДМ-2(Суточный)">БДМ-2(Суточный)</option>
+			<option value="EnergyConsumptionByDevicesByDay;Суточный расход электроэнергии по учётам">Суточный расход электроэнергии по учётам</option>
+			<option value="EnergyConsumptionByDevicesByHour;Часовой расход электроэнергии по учётам">Часовой расход электроэнергии по учётам</option>
+			<option value="ConsumptionByManufactureByPeriod;Общая по производству">Общая по производству</option>
+			<option value="ConsumptionByBDM1ByHour;БДМ-1(Часовой)">БДМ-1(Часовой)</option>
+			<option value="ConsumptionByBDM2ByHour;БДМ-2(Часовой)">БДМ-2(Часовой)</option>
+			<option value="SkuDataByShifts_BDM1;По сменный отчет БДМ-1">По сменный отчет БДМ-1</option>
+			<option value="SkuDataByShifts_BDM2;По сменный отчет БДМ-2">По сменный отчет БДМ-2</option>
+
+		</optgroup>
+	</select>
+	<input type="hidden" name="selectedItems" id="selectedItems" />
+	@Html.PartialAsync("tesYear").Result
+
+	<br>
+	<br>
+	<input id="SendButton" type="submit" class="btn btn-primary" value="Вывести записи" />
+
+}

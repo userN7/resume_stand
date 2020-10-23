@@ -1,0 +1,73 @@
+﻿@model IEnumerable<EnergyConsumptionByDevices>
+<div class="text-center text-danger">Данный отчет использует кэшированные данные, они обновляются раз в час</div>
+@* Получаем список устройств которые участвуют в отчете, затем выводим их в заголовке *@
+@{List<string> list_devices = Model.Select(e => e.Device_Name).Distinct().ToList();}
+@if (Model != null)
+{
+	@Html.PartialAsync("Reports_Attributes").Result
+	<div class="text-center text-primary">Потребление электроэнергии (кВт.ч.)</div>
+	<br />
+
+	@using (Html.BeginForm("ShowReport", "Reports", FormMethod.Post))
+	{
+		<input type="hidden" name="start_Date" id="start_Date" value=@ViewBag.start_Date />
+		<input type="hidden" name="end_Date" id="end_Date" value=@ViewBag.end_Date />
+		<input type="hidden" name="report_name" id="report_name" value=@ViewBag.report_name />
+		@Html.PartialAsync("ExcelExport").Result
+
+
+
+
+	}
+
+	<table class="table table-bordered table-striped">
+		<thead>
+			<tr>
+				<th>Дата</th>
+				<th>Время считывания cо счетчика</th>
+				@foreach (string Device_name in list_devices)
+				{
+					<th>
+						@Device_name
+					</th>
+				}
+			</tr>
+		</thead>
+		<tbody>
+			@* Берем список всех дат для которых будет вывод, каждая строка таблицы начинается с даты *@
+			@{List<DateTime> list_Dates = Model.Select(e => e.Measure_Date).Distinct().ToList();}
+			@foreach (DateTime date in list_Dates)
+			{
+				<tr>
+					<td>
+
+						@date.ToShortDateString()
+					</td>
+					<td>
+						@date.ToShortTimeString()
+					</td>
+					@* Делаем выборку на измерений электричества на текущую дату, затем разбиваем на пары устройства,
+						и его измерение, затем пробегаемся по строке, и выводим для соотвествующего устройства в колонке,
+						его данные                    *@
+					@{ IEnumerable<EnergyConsumptionByDevices> list_data_for_current_date = Model.Where(m => m.Measure_Date == date);
+						Dictionary<string, double?> dict = list_data_for_current_date.ToDictionary(d => d.Device_Name, d => d.EnergyConsumption);}
+					@for (int i = 0; i < list_devices.Count(); i++)
+					{
+
+						<td>
+							@if (dict.Keys.Contains(list_devices[i]))
+							{
+								@dict[list_devices[i]]
+							}
+
+
+						</td>
+
+
+
+					}
+				</tr>
+			}
+		</tbody>
+	</table>
+}

@@ -1,0 +1,42 @@
+﻿@model IEnumerable<PaDevices>
+@using (Html.BeginForm("ShowRecordsByStatus", "ShowRecordsByStatus", FormMethod.Post))
+{
+
+	@Html.PartialAsync("Time_Filters").Result
+
+	<input type="hidden" name="selectedItems" id="selectedItems" />
+
+	<div class="border w-25"><input type="checkbox" class="checkbox" name="onlyLastHour" /><label class="form-label-group"> Вывести текущее состояние</label> </div>
+	<br />
+	<label>Выберете устройство</label>
+	<br />
+	<select class="custom-select w-25" name="device_id">
+		<option selected="selected" disabled="disabled">Выберите устройство</option>
+		<option  value="0">Все устройства</option>
+		@foreach (PaDevices device in Model)
+		{
+			<option value="@device.DeviceId">@device.DeviceName</option>
+		}
+	</select>
+	<br />
+	<label>Выберете критерий поиска</label>
+	<br />
+
+	<select class="custom-select w-25" name="searchOption">
+		<optgroup label="Поиск">
+
+			<option value="1">
+				Показать записи не походящие по критерию
+			</option>
+			<option value="2">
+				Показать отсутствующие записи
+			</option>
+			<option selected="selected" value="3">
+				Показать все существующие записи
+			</option>
+		</optgroup>
+	</select>
+	<br>
+	<br>
+	<input type="submit" class="btn btn-primary" value="Вывести записи" />
+}

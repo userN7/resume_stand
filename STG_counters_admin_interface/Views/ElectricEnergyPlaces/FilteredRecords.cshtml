@@ -1,0 +1,106 @@
+﻿@model IEnumerable<ElectricEnergyPlaces>
+
+
+
+
+
+@if (Model != null)
+{
+	@*Сохраняем данные для другой страницы *@
+	<form id="pageform" method="post" class="form-inline d-inline-block">
+		<input type="hidden" name="selectedItems" id="selectedItems" value="@ViewBag.selected_Items" />
+		<input type="hidden" name="start_Date" id="start_Date" value="@ViewBag.start_Date" />
+		<input type="hidden" name="end_Date" id="end_Date" value="@ViewBag.end_Date" />
+
+
+
+
+		@Html.PartialAsync("Pages", Model).Result
+	</form>
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>
+					Место
+				</th>
+				<th>
+					Имя устройства
+				</th>
+				<th>
+					День
+				</th>
+				@*<th>
+					Данные по газу
+				</th>
+				<th>
+					Тепловая энергия
+				</th>
+				<th>
+					Масса теплоносителя
+				</th>
+				<th>
+					Электросчетчик
+				</th>*@
+				<th>
+					Показания
+				</th>	
+				
+			</tr>
+		</thead>
+		@foreach (ElectricEnergyPlaces record in Model)
+		{
+		<tr>
+			<td>
+				@record.PlaceID
+			</td>
+			<td>
+				@record.DEVICE_NAME
+			</td>
+			<td>
+				@record.Date.ToShortDateString()
+			</td>
+			@if (@record.GasValue != null)
+			{
+				<td>
+					Данные по газу: 
+				
+					@record.GasValue
+				</td>
+			}
+
+			@if (@record.SteamValue != null)
+			{
+				<td>
+					Тепловая энергия: 
+				
+					@record.SteamValue
+				</td>
+			}
+
+			@if (@record.SteamMassValue != null)
+			{
+				<td>
+					Масса теплоносителя: 
+				
+					@record.SteamMassValue
+				</td>
+			}
+						
+
+			@if (@record.Value != null)
+			{
+				<td>
+					Электросчетчик: 
+				
+					@record.Value
+				</td>
+			}
+
+			
+
+		</tr>
+		}
+	</table>
+}
+else
+	{ <h5 class="text-center">Не найдено записей удалетворяющих условию</h5>}

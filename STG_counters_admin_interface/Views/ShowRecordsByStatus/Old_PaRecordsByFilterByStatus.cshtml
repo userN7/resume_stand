@@ -1,0 +1,118 @@
+﻿@model IEnumerable<PaRecordsByFilter>
+@using Newtonsoft.Json;
+
+	
+
+@if (Model != null)
+{
+
+	string serializedModel = JsonConvert.SerializeObject(Model);
+	<form method="post" asp-action="EditGroupRecordsByStatus">
+		<label>Среднее значение для постановки</label>
+		<input type="text" class="col-1 input-group-text" name="avarageValue" id="avarageValue" value="0" />
+		<br />
+		<input type="submit" class="btn btn-primary" id="GroupSubmit" onclick="getCheckedCheckBoxes()" value="Изменить выделенные" />
+		<br />
+		<input type="hidden" name="checkedIds" />
+		<input type="hidden" name="checkedMeasureValues" />
+		<input type="hidden" name="serializedModel" value="@serializedModel" />
+	</form>
+	<script>
+		//Пробегаемся по всем выбраным чекбоксам и собераем индификаторы
+		function getCheckedCheckBoxes() {
+			var checkboxes = document.getElementsByClassName('checkbox');
+			var measureValues = document.getElementsByClassName('measureValue');
+			var checkboxList = '';
+			var mesureValuesList = '';
+
+			for (var index = 0; index < checkboxes.length; index++) {
+				if (checkboxes[index].checked) {
+
+					checkboxList = checkboxList + checkboxes[index].id + ',';
+					mesureValuesList = mesureValuesList + measureValues[index].value + ';';
+				}
+
+				$('input[name="checkedIds"]').val(checkboxList);
+				$('input[name="checkedMeasureValues"]').val(mesureValuesList);
+			}
+
+
+		}
+		function CheckInAllCheckbox() {
+			//Массовое выставление галочек
+			var checkboxes = document.getElementsByClassName('checkbox');
+			var checkall = document.getElementsByName('CheckedAll')[0];
+			for (var index = 0; index < checkboxes.length; index++) {
+				checkboxes[index].checked = checkall.checked;
+
+			}
+
+
+
+		}
+	</script>
+	<table class="table table-bordered table-striped">
+
+		<thead>
+			<tr>
+				<th>
+					<input type="checkbox" name="CheckedAll" onclick="CheckInAllCheckbox()" />
+				</th>
+				<th>
+					Имя передела
+				</th>
+				<th>
+					Имя устройства
+				</th>
+				<th>
+					Время записи
+				</th>
+				<th>
+					Значение параметра
+				</th>
+				<th>
+					Статус записи
+				</th>
+			</tr>
+		</thead>
+		@foreach (PaRecordsByFilter item in Model)
+		{
+			<tr>
+				<td>
+					<input class="checkbox" type="checkbox" name="ch_+@item.ID" id="@item.ID">
+				</td>
+				@*<form asp-action="EditRecordsByStatus" method="post">*@
+
+				<td>
+					@item.PlaceName
+				</td>
+				<td>
+					@item.DEVICE_NAME
+				</td>
+				<td>
+					@item.RECORD_TIME
+				</td>
+				<td>
+
+
+					<input type="text" class="measureValue" name="MEASURE_VALUE" id="@item.ID" value="@item.MEASURE_VALUE" />
+				</td>
+				<td>
+					@item.RecordStatus
+				</td>
+				<td>
+
+
+
+					@*<input type="hidden" name="DEVICE_ID" id="DEVICE_ID" value="@item.DEVICE_ID" />
+						<input type="hidden" name="ID_RECORD" id="ID_RECORD" value="@item.ID_RECORD" />
+						<input type="hidden" name="RECORD_TIME" id="RECORD_TIME" value="@item.RECORD_TIME" />
+						<input type="hidden" name="records_set" id="records_set" value="@Model" />
+						<input type="submit" class="btn btn-primary" value="Изменить" />*@
+
+				</td>
+				@*</form>*@
+			</tr>
+		}
+	</table>
+}

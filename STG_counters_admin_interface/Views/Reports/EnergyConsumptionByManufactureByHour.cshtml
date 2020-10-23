@@ -1,0 +1,70 @@
+﻿@model ReportInfo
+@using System.Reflection;
+@*<div class="text-center text-danger">Данный отчет использует кэшированные данные, они обновляются раз в час</div>
+	<div class="text-center text-danger">Правильно заполняйте места откуда считаются данные, иначе они в отчет не попадут</div>*@
+<br />
+<br />
+@if (Model.Records != null&&Model.Records.Count>0)
+{
+	@Html.PartialAsync("Reports_Attributes").Result
+	<div class="text-center text-primary">Потребление электроэнергии (кВт.ч.)</div>
+	<br />
+	@Html.PartialAsync("ExcelExport").Result
+	var Places = Constants.places;
+	var records = Model.Records.Select(r => (Data_EnergyConsumptionByManufactureByHour)r);
+	<table class="table table-bordered table-striped">
+		<thead class="text-center">
+			<tr>
+				<th>
+					Дата
+				</th>
+				<th>
+					Период
+				</th>
+				
+				@if (Places != null)
+				{
+
+
+					@foreach (var item in Places)
+					{
+					<th>
+						@item.Key
+					</th>
+					}
+				}
+				<th>
+					Всего
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in records)
+			{
+			<tr>
+				<td>@item.Date</td>
+				<td>@item.Time</td>
+				@foreach (var value in item.Values)
+				{
+					<td>@value</td>
+				}
+			</tr>
+			}
+		<tr>
+			<td>Итого:</td>
+			<td></td>
+			@{var sums = Model.Sums.First().Value;}
+			@if (sums != null)
+			{
+				@for (int i = 0; i < sums.Length; i++)
+				{
+					<td>@sums[i]</td>
+				}
+			}
+
+		</tr>
+		</tbody>
+	</table>
+				}
+				else
+				{ <h2 style="color:red">Нет записей удолеворяющих условиям!</h2>}

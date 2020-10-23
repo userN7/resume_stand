@@ -1,0 +1,26 @@
+﻿<label>Записи с @ViewBag.start_Date по @ViewBag.end_Date</label>
+<div id="jstree"></div>
+
+<script type="text/javascript">
+        $(function () {
+            $('#jstree').jstree({
+                "core": {
+                    "themes": {
+						"variant": "large",
+						"icons": false
+                    },
+                    "data": @Html.Raw(ViewBag.Json)
+                    },
+                "checkbox": {
+                    "keep_selected_style": false
+				},
+				//плугины:
+				//wholerow - убирает черточки рисующие дерево,
+				//checkbox- реализация чекбоксов,
+				//search - реализация поиска
+                "plugins": @Html.Raw(ViewBag.JsTreePlugins),
+			});
+			  });
+			
+
+</script>

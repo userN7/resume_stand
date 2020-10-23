@@ -1,0 +1,13 @@
+﻿@Html.PartialAsync("Tree_Of_Devices").Result
+
+
+
+@using (Html.BeginForm("FilteredRecords", "RecordsManagment", FormMethod.Post))
+{
+
+	@Html.PartialAsync("Time_Filters").Result
+	<input type="checkbox" id="showWrongRecords" name="showWrongRecords"><label>Показывать только неправильные записи</label>
+	<input type="hidden" name="selectedItems" id="selectedItems" />
+	<br>
+	<input type="submit" class="btn btn-primary" value="Вывести записи" />
+}

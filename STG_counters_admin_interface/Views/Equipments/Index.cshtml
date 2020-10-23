@@ -1,0 +1,68 @@
+﻿@model IEnumerable<PaDevices>
+
+@if (Model != null)
+{
+    
+    <table class="table table-striped">
+        <thead>
+
+            <tr>
+                <th>
+                    Тип устройства
+                </th>
+                <th>
+                    Название устройства
+                </th>
+
+                <th>
+                    Описание устройства
+                </th>
+                <th>
+                    Тип адаптера
+                </th>
+
+            </tr>
+
+        </thead>
+        <tbody>
+            @foreach (PaDevices device in Model)
+            {
+                <tr>
+                    <td>
+                        @device.DeviceTypeName
+                    </td>
+
+                    <td>
+                        @device.DeviceName
+                    </td>
+
+                    <td>
+                        @device.DeviceDescription
+                    </td>
+
+                    <td>
+                        @if (device.PaAdapters != null)
+                        {
+                            <table class="table table-striped">
+
+                                @foreach (PaAdapters adapter in device.PaAdapters)
+                                {
+                                    <tr>
+                                        <td>
+                                            @adapter.AdapterName
+                                        </td>
+                                    </tr>
+                                }
+
+                            </table>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <h2 class="text-center">Нет записей</h2>
+}

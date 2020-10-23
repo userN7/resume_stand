@@ -1,0 +1,271 @@
+﻿@using System.Reflection;
+@using System.Globalization;
+@using static STG_counters_admin_interface.Models.StaticMethods;
+@using System.Text.RegularExpressions;
+@using static STG_counters_admin_interface.Models.Constants;
+@model ReportInfo;
+@*@if (shifts_plan != null)
+	{*@
+@{
+	var shifts_index_list = Model.Records_List["Shifts_index_list"].Select(r=>(string)r).ToList();
+	var shifts_dates_list = Model.Records_List["Shifts_dates_list"].Select(r => (string)r).ToList();
+	var currShiftIndex = Model.CurrShiftIndex;
+	var currShiftStart = Model.ReportDates.CurrShiftStart;
+	var currShiftEnd = Model.ReportDates.CurrShiftEnd;
+
+
+	var list_to_Chart_SkuDataByShifts = Constants.list_to_Chart_SkuDataByShifts;//поля содержащие данные для вывода графика
+
+
+	FieldInfo[] myFieldInfo_SkuDataByShifts = typeof(SkuDataByShifts).GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
+		.Where(field => list_to_Chart_SkuDataByShifts.Contains(GetFieldName(field))).ToArray();//берем только те поля для которых нужно выводить график
+
+	var ter_List = ter_list_shifts;
+	var sku = Model.SelectedSortOfProduction;
+	//Нужно чтобы переделовать числа с плавающей точкой в из х,х в х.х
+	var culture = CultureInfo.CreateSpecificCulture("en-CA");
+	var shifts_plan = Model.Records_List["Shifts_plan"].UnPack<StgPlanTer>();
+
+	double multiplierMaxCoef = 0.75;
+	List<double> shifts_plan_data = new List<double>();
+
+	// имена полей содержащие данные для графика
+	 var list_to_chart_StgPlanTer = Constants.list_to_chart_StgPlanTer;
+
+	var myFieldInfo_StgPlanTer = typeof(StgPlanTer).GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
+		.Where(field => list_to_chart_StgPlanTer.Contains(GetFieldName(field))).ToArray();//берём только те поля которые содержат данные для графика
+	StgPlanTer curr_shifts_plan;
+	int sku_counter = 1;//Участвует в создании уникального ID для canvas куда будем рисовать каждый график
+	var SkuDataByShifts = Model.Records_List["SkuDataByShifts"]
+									.Select(r=>(SkuDataByShifts)r)
+									.Where(r=>Model.ReportDates.CurrShiftStart<=r.CycleDateBegin&&r.CycleDateEnd<=Model.ReportDates.CurrShiftEnd)
+									.ToList();
+	string shiftId = SkuDataByShifts.FirstOrDefault() != null ? SkuDataByShifts.FirstOrDefault().ShiftId.ToString() : "Нет данных";
+	string machinist_name = SkuDataByShifts.FirstOrDefault() != null ? SkuDataByShifts.FirstOrDefault().Machinist_name.ToString() : "Нет данных";
+
+
+}
+
+@Html.PartialAsync("ExcelExport").Result
+<br />
+@*выбор смены для отчета*@
+<form action="ShowReport" method="post" name="ShiftChange">
+	<label><b>Выбранная смена:</b> </label>
+	@{//Рисуем выбор смен
+		ViewContext.Writer.Write(StaticMethods.WriteSelect(shifts_index_list, shifts_dates_list,
+				nameSel: "currShiftIndex",
+				idSel: "currShiftIndex",
+				Model.GetCurShiftIndex(currShiftIndex, shifts_index_list.Count).ToString(),
+				funcName: "fireSubmit")//Если не выбрана смена то выбираем последнюю
+
+			); }
+	@Html.PartialAsync("ReportParams").Result
+	<input type="hidden" name="selectedSortOfProduction" id="selectedSortOfProduction" value="@Model.SelectedSortOfProduction" />
+	@*<input type="hidden" name="curr_shift_start" id="curr_shift_start" value="@currShiftStart" />
+		<input type="hidden" name="curr_shift_end" id="curr_shift_end" value="@currShiftEnd" />*@
+
+</form>
+<div><b>Отчёт за смену № @shiftId</b></div>
+<div><b>Дата: </b>@Model.ReportDates.CurrShiftStart.ToShortDateString() - @Model.ReportDates.CurrShiftEnd.ToShortDateString()</div>
+
+
+<div><b>Время:</b> c @Model.ReportDates.CurrShiftStart.ToShortTimeString() до @Model.ReportDates.CurrShiftEnd.ToShortTimeString()</div>
+<div><b>Передел: </b>@Model.PlaceName</div>
+<div><b>Машинист: </b>@machinist_name</div>
+
+<br />
+@{
+	double curr_Data;
+	string curr_Data_string;
+	string curr_Data_color = null; }
+@*Для каждого sku будем рисовать графики*@
+
+@foreach (var skuData in SkuDataByShifts)
+{
+
+	int chart_index = 0;
+	shifts_plan_data = new List<double>();
+	curr_shifts_plan = shifts_plan.Where(r => r.Sku == skuData.Sku).FirstOrDefault();
+	if (curr_shifts_plan == null)
+	{
+		<h4 style="color:red">
+			Не забит план по виду продукции @skuData.Sku для @Model.PlaceName за @CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(currShiftStart.Month)  в @currShiftStart.Year году!
+		</h4>
+		continue;
+	}
+	//Зная что после нескольких полей идут парами данные, используем это
+	for (int i = 0; i < myFieldInfo_StgPlanTer.Length; i = i + 2)
+	{
+		shifts_plan_data.Add((double)myFieldInfo_StgPlanTer[i].GetValue(curr_shifts_plan));//Минимальное значение
+		shifts_plan_data.Add((double)myFieldInfo_StgPlanTer[i + 1].GetValue(curr_shifts_plan) - (double)myFieldInfo_StgPlanTer[i].GetValue(curr_shifts_plan));//Норма
+		shifts_plan_data.Add((double)myFieldInfo_StgPlanTer[i].GetValue(curr_shifts_plan) * multiplierMaxCoef);//Максимум
+
+	};
+
+
+	<div><b>Наименование продукции: </b>@skuData.Sku</div>
+	<div><b>Жидкий поток: </b>@skuData.FluidStream</div>
+	<div><b>Средняя влажность: </b>@skuData.Wetness</div>
+	<div><b>Начало цикла: </b>@skuData.CycleDateBegin</div>
+	<div><b>Конец цикла: </b>@skuData.CycleDateEnd</div>
+	<br />
+	<br />
+
+	<table class="table table-bordered">
+		<tbody>
+			<tr>
+				@for (int i = 0; i < myFieldInfo_SkuDataByShifts.Length; i++)
+				{
+
+					<td class="text-center font-weight-bold">
+						@ter_List.ElementAt(i)@*</td>
+
+							</tr>
+							<tr>
+								<td>*@
+						<div style="width:300px" class="chart-container">
+							<canvas id=@(sku_counter.ToString() + "_" + chart_index.ToString())></canvas>
+						</div>
+					</td>
+
+					chart_index++;
+				}
+			</tr>
+		</tbody>
+	</table>
+
+	chart_index = 0;
+	var list_readings_color_min_max = new Dictionary<string, string>() {{ "min", "green"},
+																			{ "norm","yellow"},
+																			{"max",  "red" },
+																			{"max_label", "Превышение" }};
+	var list_readings_color_max_min = new Dictionary<string, string>() {{ "min","red" },
+																			{ "norm","yellow"},
+																			{"max", "green"  },
+																			{"max_label", "Максимальное" }};
+
+	var list_fields_for_color_max_min = new List<string>() { "ShiftProductivity", "AverageSpeed" };
+	Dictionary<string, string> curr_list_readings_color;
+
+
+	//string min_readings_color = "green";
+	//string max_readings_color = "red";
+	//string max_readings_name = "Превышение";
+	@for (int i = 0; i < myFieldInfo_SkuDataByShifts.Length; i++)
+	{
+		if (list_fields_for_color_max_min.Contains(GetFieldName(myFieldInfo_SkuDataByShifts[i])))//для определённых полей меняются местами цвета, и меняется лейбл
+		{
+			curr_list_readings_color = list_readings_color_max_min;
+		}
+		else
+		{
+			curr_list_readings_color = list_readings_color_min_max;
+		}
+
+		curr_Data_color = "";
+		//Так как в графики используется плавающая переменная с точкой, то нужно ее выгрузить в соответсвующей локали
+		// а с учетом того что такая конструкция не работает ((double)myFieldInfo[i].GetValue(@Model.FirstOrDefault()).ToString(CultureInfo.CreateSpecificCulture("en-CA")),
+		//то делаем последовательно
+		curr_Data = (double)myFieldInfo_SkuDataByShifts[i].GetValue(skuData);
+		curr_Data_string = curr_Data.ToString(culture);
+		if (shifts_plan_data[chart_index * 3] >= curr_Data) { curr_Data_color = @curr_list_readings_color["min"]; }//Меньше минимума
+		if ((shifts_plan_data[chart_index * 3] < curr_Data) && ((shifts_plan_data[chart_index * 3] + shifts_plan_data[chart_index * 3 + 1]) >= curr_Data)) { curr_Data_color = @curr_list_readings_color["norm"]; }//между мин. и нормой
+		if (shifts_plan_data[chart_index * 3] + shifts_plan_data[chart_index * 3 + 1] < curr_Data) { curr_Data_color = @curr_list_readings_color["max"]; }//больше нормы
+
+		<script>
+		var newChar = new Chart(document.getElementById("@(sku_counter.ToString() + "_" + chart_index.ToString())"),
+			{
+
+				type: 'horizontalBar',
+
+				data: {
+
+			datasets: [{
+						label:["Мин.: @shifts_plan_data[chart_index * 3]"],
+						data: ['@shifts_plan_data[chart_index * 3].ToString(culture)'],
+						backgroundColor: ['@curr_list_readings_color["min"]'],
+						stack: 'indicator',
+						borderColor: ['black'],
+						borderWidth: 1
+						},
+						{
+						label:["Норма: @(shifts_plan_data[chart_index * 3] + shifts_plan_data[chart_index * 3 + 1])"],
+						data: ['@shifts_plan_data[chart_index * 3 + 1].ToString(culture)'],
+						backgroundColor: ['@curr_list_readings_color["norm"]'],
+						stack: 'indicator',
+						borderColor: ['black'],
+						borderWidth: 1
+
+						},
+						{
+						label: ["@Html.Raw(@curr_list_readings_color["max_label"])"],
+						data: ['@shifts_plan_data[chart_index * 3 + 2].ToString(culture)'],
+						backgroundColor: ['@curr_list_readings_color["max"]'],
+						stack: 'indicator',
+						borderColor: ['black'],
+						borderWidth: 1
+
+						},
+						{
+						label: ["Текущие показания: @Math.Round(curr_Data, 4)"],
+						data: ['@curr_Data_string'],
+						backgroundColor: ['@curr_Data_color'],
+						stack: 'data',
+						borderColor: ['black'],
+						borderWidth: 1
+
+						},
+					]
+				},
+
+				options: {
+			scales: {
+				xAxes: [{
+					ticks: { beginAtZero: true },
+							stacked: true
+						}]
+					},
+					legend: { display: true },
+				}
+		});
+		</script>
+		chart_index++;
+	}
+	sku_counter++;
+}
+@*}
+	else
+	{< h4 style = "color:red" > Не забит план по виду продукции @sku за @CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(ViewBag.start_Date.Month)  в @ViewBag.start_Date.Year году! </ h4 > }
+	}*@
+<script>
+
+	//setTimeout(ExportExcelFunc, 10);
+
+	function ExportExcelFunc(event) {
+		//Добавляем рисунки графиков для формы вызывающей выгрузку рисунков
+		for (var id in Chart.instances) {
+			var input = document.createElement("input");
+			input.value = Chart.instances[id].toBase64Image();
+			input.hidden = true;
+			input.name = "baseStrings";
+
+			document.getElementById("excelForm").appendChild(input);
+		}
+		//Добавляем индекс текущей выбранной смены
+		inp = document.createElement('input');
+		inp.type = 'hidden';
+		inp.name = 'currShiftIndex';
+		inp.value = $('#currShiftIndex').val();
+
+		//alert($('#select_selectedSortOfProduction').val());
+		//inp2.id = 'input_2';
+		document.getElementById('excelForm').appendChild(inp);
+	}
+
+	function fireSubmit(event) {
+		document.forms["ShiftChange"].submit();
+	}
+
+</script>
+
+

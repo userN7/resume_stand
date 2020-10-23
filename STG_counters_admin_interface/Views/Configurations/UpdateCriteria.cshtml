@@ -1,0 +1,28 @@
+﻿@model StgCriteriaForDataFromDevices
+
+
+
+    <form asp-action="UpdateCriteria" method="post">
+
+
+        <input type="hidden" asp-for="IdCriteria" readonly />
+        
+
+        <div class="form-group">
+
+            <label asp-for="MinParam"></label>
+            <input asp-for="MinParam" />
+        </div>
+        <div class="form-group">
+
+            <label asp-for="MaxParam"></label>
+            <input asp-for="MaxParam" />
+        </div>
+        
+        <div class="text-center">
+            <button class="btn btn-primary" type="submit">Сохранить</button>
+            <a asp-action="UpdateCriteria" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+    
+

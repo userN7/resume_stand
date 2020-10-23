@@ -1,0 +1,18 @@
+﻿@if (ViewBag.Message_text != null)
+{
+	<h2 class="text-center" style="color:@ViewBag.Message_color"> @Html.Raw(ViewBag.Message_text)</h2>
+}
+<h4>Для отчёта "Средневзвешенное ТЭР на тонну по циклам производства" и для отчётов "По сменный отчет БДМ-1,2"</h4>
+<form action="Action_selector" method="post">
+	
+	<input type="hidden" name="actionName" value="@ViewData["actionName"]" />
+	<br />
+	<label>Параметры:</label>
+	<br />
+	@Html.PartialAsync("Selecter_Year_SKU_BDM").Result
+	<br />
+	<br />
+	<button type="submit" class="btn btn-primary">Выбрать</button>
+
+</form>
+

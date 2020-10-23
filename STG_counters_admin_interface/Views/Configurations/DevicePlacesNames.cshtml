@@ -1,0 +1,74 @@
+﻿
+@model IEnumerable<StgPlacesNames>
+
+@if (Model != null)
+{
+
+
+	@if (@ViewBag.placeExists == 1)
+	{
+
+		<div style="color:red">@Html.Raw("<h4>Место с таким ИД уже существует - " + @ViewBag.existPlaceName+"</h4>")</div>
+		<br />
+		<div style="color:red">@Html.Raw(" Использованые ид  <br/><br/> " + @ViewBag.ID_names_List)</div>
+		@*//
+			//
+			//alert('!');
+			//$('#place_PlaceName').val =@ViewBag.placeName;
+			//$('#place_PlaceId').val =@ViewBag.placeId;
+			 //document.getElementById("PlaceId").focus();*@
+	}
+
+	<table class="table table-bordered table-striped">
+		<thead>
+			<tr>
+				<td>
+					ИД места
+				</td>
+				<td>
+					Имя места
+				</td>
+				<td></td>
+			</tr>
+		</thead>
+		<tbody>
+			@*Для  добавления нового места*@
+			<tr>
+				<form action="UpdateDevicePlacesNames" method="post">
+
+					@{ StgPlacesNames place_to_add = new StgPlacesNames(); }
+					<td>
+						<input asp-for="@place_to_add.PlaceId" name="new_place.PlaceId" />
+					</td>
+					<td>
+						<input asp-for="@place_to_add.PlaceName" name="new_place.PlaceName" />
+					</td>
+					<td>
+						<input type="submit" class="btn btn-primary" value="Добавить" />
+					</td>
+				</form>
+			</tr>
+
+			@foreach (StgPlacesNames curr_place in Model)
+			{
+				<tr>
+					<form action="UpdateDevicePlacesNames" method="post">
+
+						<td>
+							<input asp-for="@curr_place.PlacesNamesId" value="@curr_place.PlacesNamesId" name="place.PlacesNamesId" hidden/>
+							<input  asp-for="@curr_place.PlaceId" value="@curr_place.PlaceId" name="place.PlaceId"/>
+						</td>
+						<td>
+							<input  asp-for="@curr_place.PlaceName" value="@curr_place.PlaceName" name="place.PlaceName" />
+						</td>
+						<td>
+							<input type="submit" class="btn btn-primary" value="Изменить" />
+							<a class="btn btn-secondary" asp-route-key="@curr_place.PlacesNamesId" name="place.PlacesNamesId" asp-action="DeleteDevicePlacesNames">Удалить</a>
+						</td>
+					</form>
+				</tr>
+
+			}
+		</tbody>
+	</table>
+}

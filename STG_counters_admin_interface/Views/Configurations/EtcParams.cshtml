@@ -1,0 +1,42 @@
+﻿@model IQueryable<StgConfigParams>
+@Html.PartialAsync("ViewBagMassagesHandler").Result
+	<table class="table table-bordered table-striped">
+		<thead class="text-center">
+		<th>
+			Название параметра
+		</th>
+		<th>
+			Значение параметра
+		</th>	
+		<th>
+				Раcшифровка
+			</th>
+		<th>
+
+		</th>
+		</thead>
+	<tbody>
+		@foreach (var item in Model)
+		{
+		<form asp-action="ChangeEtcParam" method="post">
+			<tr>
+				<td>
+					<input name="param.Id" asp-for="@item.Id" hidden />
+					<input name="param.ParamName" asp-for="@item.ParamName" />
+				</td>
+				<td>
+					<input name="param.ParamVal" asp-for="@item.ParamVal" />
+				</td>
+				<td>
+					<input name="param.ParamDescription" asp-for="@item.ParamDescription" hidden />
+					@item.ParamDescription
+				</td>
+				<td>
+					<button class="btn btn-primary">Изменить</button>
+				</td>
+			</tr>
+		</form>
+		}
+	</tbody>	
+	</table>
+

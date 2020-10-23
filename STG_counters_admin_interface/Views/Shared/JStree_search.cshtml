@@ -1,0 +1,17 @@
+﻿<label>Поиск: </label>
+<input type="text" id="jstree_search" />
+<br />
+<br />
+
+<script>
+    var to = false;
+    $('#jstree_search').keyup(function () {
+        if (to) { clearTimeout(to); }
+        to = setTimeout(function () {
+            var v = $('#jstree_search').val();
+            $('#jstree').jstree(true).search(v);
+        }, 250);
+    });
+      //Реализуем поиск при введении в input строки для поиск,
+			//каждые 250 миллисекунд, реализуется новый поиск на основе введенного текста
+</script>

@@ -1,0 +1,51 @@
+﻿@model IEnumerable<StgRecordsLost>
+<div class="col-4">
+	<div class="row">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Имя устройства</th>
+					<th>Дата пропущенного периода</th>
+					<th>ID параметров</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (StgRecordsLost device in Model)
+				{
+				<tr>
+					<td>
+						@device.IdDevice
+					</td>
+					<td>
+						@device.IdDeviceNavigation.DeviceName
+					</td>
+					<td>
+						@device.RecordTime
+					</td>
+					<td>
+						<table class="table table-striped">
+							<thead>
+								<tr>
+									<th>ID</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (StgDataLost data in @device.StgDataLost)
+								{
+
+									<tr>
+										<td>
+											@data.IdParameter
+										</td>
+									</tr>
+								}
+								</tbody>
+</table>
+</td>
+				</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+	</div>

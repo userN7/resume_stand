@@ -1,0 +1,82 @@
+﻿
+@model IEnumerable<PaDevices>
+
+@if (Model!= null)
+{
+	
+	<table class="table table-bordered table-striped">
+		<thead>
+			<tr>
+				<th>
+					Тип устройства
+				</th>
+				<th>
+					Имя устройства
+				</th>
+				<th>
+					Описание устройства
+				</th>
+				<th>
+					Места расположения
+				</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (PaDevices item in Model)
+			{
+				<tr>
+					<td width="20">
+						@item.DeviceTypeName
+					</td>
+					<td width="20">
+						@item.DeviceName
+					</td>
+					<td width="20">
+						@item.DeviceDescription
+					</td>
+					<td>
+						<table>
+							<thead>
+								<tr>
+									<th>
+										Место
+									</th>
+									<th>
+										Начало
+									</th>
+									<th>
+										Конец
+									</th>
+								<th>
+									Умножитель
+								</th>
+								</tr>
+							</thead>
+						<tbody>
+	@foreach (DevicePlaces place in item.DevicePlaces.OrderBy(p=>p.PlaceName))
+	{
+							<tr>
+								<td>
+									@place.PlaceName
+								</td>
+								<td>
+									@place.BeginDateOfLocation.ToShortDateString()
+								</td>
+								<td>
+									@place.EndDateOfLocation.ToShortDateString()
+								</td>
+								<td>
+									@place.Multiplier
+								</td>
+							</tr>
+	}
+							</tbody>
+							</table>
+</td>
+					<td>  <a class="btn btn-outline-secondary" asp-route-key="@item.DeviceId" asp-action="UpdateDevicePlaces">Изменить места</a></td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}

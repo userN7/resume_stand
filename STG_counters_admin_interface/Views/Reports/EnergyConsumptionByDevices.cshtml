@@ -1,0 +1,94 @@
+﻿@model ReportInfo
+@*<div class="text-center text-danger">Данный отчет использует кэшированные данные, они обновляются раз в час</div>*@
+
+@* Получаем список устройств которые участвуют в отчете, затем выводим их в заголовке *@
+@{  var records = Model.Records
+		.Select(r => (EnergyConsumptionByDevices)r)
+		//.OrderBy(r=>r.Measure_Date)
+		.ToList();
+	List<string> list_devices = records.Select(e => e.Device_Name).Distinct().ToList();
+	bool isByDay = Model.IsByDay;
+	
+	}
+@if (Model != null)
+{
+	@Html.PartialAsync("Reports_Attributes").Result
+	<div class="text-center text-primary">Потребление электроэнергии (кВт.ч.)</div>
+	<br />
+	@using (Html.BeginForm("ShowReport", "Reports", FormMethod.Post))
+	{
+		@Html.PartialAsync("ReportParams").Result
+		@Html.PartialAsync("ExcelExport").Result
+
+
+
+
+	}
+
+	<table class="table table-bordered table-striped">
+		<thead>
+			<tr>
+				<th>Дата</th>
+				@foreach (string Device_name in list_devices)
+				{
+					<th class="h-25">
+						@Device_name
+					</th>
+				}
+				@*<th>
+						Итого:
+					</th>*@
+				<th>
+					Итого по производству:
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			@* Берем список всех дат для которых будет вывод, каждая строка таблицы начинается с даты *@
+			@{List<DateTime> list_Dates = records.Select(e => e.Measure_Date).Distinct().ToList();
+				
+				var sums_col_prod = Model.Sums["EnergyConsumptionByDevices_col_production"];
+				int index = 0;}
+			@foreach (DateTime date in list_Dates)
+			{
+				<tr>
+					<td>
+						@date.ToShortDateString()  @(isByDay ? "" : " " + date.ToShortTimeString())
+					</td>
+					@* Делаем выборку на измерений электричества на текущую дату, затем разбиваем на пары устройства,
+						и его измерение, затем пробегаемся по строке, и выводим для соотвествующего устройства в колонке,
+						его данные                    *@
+					@{ List<EnergyConsumptionByDevices> list_data_for_current_date = records.Where(m => m.Measure_Date == date).ToList();
+
+						Dictionary<string, double?> dict = list_data_for_current_date.ToDictionary(d => d.Device_Name, d => d.EnergyConsumption);}
+					@for (int i = 0; i < list_devices.Count(); i++)
+					{
+
+						<td>
+							@if (dict.Keys.Contains(list_devices[i]))
+							{
+								@dict[list_devices[i]]
+							}
+
+
+						</td>
+
+
+
+					}
+					@*<td>@sums_col[index]</td>*@
+					<td><b>@sums_col_prod[index]</b></td>
+					@{index++;}
+				</tr>
+			}
+			@{var sums = Model.Sums["EnergyConsumptionByDevices"];}
+			<tr>
+				<td><b>Итого:</b></td>
+				@foreach (var sum in sums)
+				{
+					<td><b>@sum</b></td>
+				}
+			</tr>
+		</tbody>
+	</table>
+}

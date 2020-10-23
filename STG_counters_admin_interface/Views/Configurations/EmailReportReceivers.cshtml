@@ -1,0 +1,70 @@
+﻿@model IEnumerable<StgEmailReportsNames>
+
+<table class="table table-bordered">
+<thead>
+	<tr>
+		<th>
+			Имя отчета
+		</th>
+		<th>
+			Периодичность посылки в мин.
+		</th>
+		<th>
+			Получатели
+		</th>
+	</tr>
+</thead>
+<tbody>
+	@foreach (StgEmailReportsNames report in Model)
+	{
+		<tr>
+			<td>
+				@report.ReportName
+			</td>
+			<td>
+				
+				<form method="post" asp-action="ChangeDelayTime" >
+					
+					<input name="report_id" value="@report.Id" hidden />
+					<input name="new_delay" value="@report.DelayTime" />
+					
+					<input type="submit" value="Изменить" />
+				</form>
+			</td>
+			<td>
+				<table class="table table-bordered table-striped">
+					<tr>
+						<form action="AddEmailReceiver" method="post">
+							<td>
+
+								<input name="report_id" value="@report.Id" hidden />
+								<input name="receiver_email_name" type="email" required value=""/>
+								
+								
+							</td>
+							<td>
+								<input type="submit" class="btn btn-outline-primary" value="Добавить получателя" />
+							</td>
+						</form>
+					</tr>
+					@foreach (StgEmailReportsReceivers receiver in report.StgEmailReportsReceivers)
+					{
+				<form method="post" asp-action="ChangeEmailReceiver">
+					<tr>
+						<td>
+							<input asp-for="@receiver.EmailReportsReceiversId" hidden />
+							<input  type="email" asp-for="@receiver.EmailName"  required />
+						</td>
+						<td>
+							<input class="btn btn-outline-primary" type="submit" value="Изменить"  />
+							<a class="btn btn-outline-secondary" asp-route-key="@receiver.EmailReportsReceiversId" asp-action="DeleteEmailReceiver">Удалить</a>
+						</td>
+					</tr>
+				</form>
+					}
+				</table>
+			</td>
+		</tr>
+	}
+</tbody>
+</table>

@@ -1,0 +1,26 @@
+﻿<form asp-action="Action_handler">
+	@Html.PartialAsync("Time_Filters").Result
+	<script>
+		onSelChange = function (event) {
+
+
+			if ($("#action_number option:selected").val() == 7) document.getElementById("selYears").hidden = false
+			else document.getElementById("selYears").hidden = true
+
+
+
+		}
+	</script>
+	<select name="action_number" id="action_number" class="custom-select w-25" onchange="onSelChange(event)">
+		<option value="1"> Заполнить Cache_TagDump</option>
+		<option value="2"> Заполнить fill_AverageSpeed</option>
+		<option value="3"> Заполнить таблицу CSP_ByDay</option>
+		<option value="4"> Заполнить таблицу CSP_ByMonth</option>
+		<option value="5"> Уточнить таблицу CSP_ByDay с распределением пустого времени в зависимости от параметра</option>
+		<option value="6"> Уточнить таблицу CSP_ByMonth с распределением пустого времени в зависимости от параметра</option>
+		<option value="7"> Заполнить TER_avg_permonth</option>
+	</select>
+	@Html.PartialAsync("tesYear").Result
+	<br />
+	<button class="btn btn-primary" type="submit">Выполнить</button>
+</form>

@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+	<meta name="viewport" content="width=device-width" />
+	<title>STG Counters</title>
+	@*jquery*@
+	<script type="text/javascript" asp-src-include="lib/jQuery/dist/jquery.min.js"></script>
+
+
+	@*For datepickers*@
+
+	<link rel="stylesheet" asp-href-include="lib/jquery-ui/themes/base/jquery-ui.min.css">
+	<script asp-src-include="lib/jquery-ui/jquery-ui.min.js"></script>
+
+	<script asp-src-include="lib/jquery-ui/ui/i18n/datepicker-ru.js"></script>
+	@*For  jsChart*@
+
+	<script asp-src-include="lib/JsChart/Chart.js"></script>
+	@*For jsTree*@
+	<link rel="stylesheet" asp-href-include="lib/jsTree/dist/themes/default/style.min.css" />
+
+	<script type="text/javascript" asp-src-include="lib/jsTree/dist/jstree.min.js"></script>
+
+	@*Bootstrap*@
+	<link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+
+	<style>
+		.placeholder {
+			visibility: collapse;
+			display: none
+		}
+
+			.placeholder:only-child {
+				visibility: visible;
+				display: flex
+			}
+	</style>
+
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="row p-2">
+			<div class="col-2">
+				@*<a asp-controller="Home" asp-action="Index" class="@GetClassForButton("Home")">Начальная страница</a>*@
+				@*<a asp-controller="LostRecordsManagment" asp-action="Index" class="@GetClassForButton("LostRecordsManagment")">Потерянные записи</a>*@
+				<a asp-controller="Reports" asp-action="Index" class="@GetClassForButton("Reports")">Отчеты</a>
+				<a asp-controller="Configurations" asp-action="Index" class="@GetClassForButton("Configurations")">Конфигурации</a>
+				<a asp-controller="RecordsManagment" asp-action="Index" class="@GetClassForButton("RecordsManagment")">Просмотр показаний по счетчикам</a>
+				@* <a asp-controller="ElectricEnergyPlaces" asp-action="Index" class="@GetClassForButton("ElectricEnergyPlaces")">Просмотр показаний суммарно за день</a>*@
+				@*<a asp-controller="ConsumptionByCycleOfProduction" asp-action="Index" class="@GetClassForButton("ConsumptionByCycleOfProduction")">Энергоемкость по циклам производства</a>*@
+				@*<a asp-controller="Equipments" asp-action="Index" class="@GetClassForButton("Equipments")">Конфигурация устройств</a>*@
+				<a asp-controller="ShowRecordsByStatus" asp-action="Index" class="@GetClassForButton("ShowRecordsByStatus")">Поиск неправильных и отсутствующих записей</a>
+				<a asp-controller="AdditionalData" asp-action="Index" class="@GetClassForButton("AdditionalData")">Ввод данных</a>
+
+@if (ViewBag.exec_time!=null)
+{
+			<h6>Время выполнения: @ViewBag.exec_time</h6>  
+}
+			</div>
+
+			<div class="col-10" >
+				@RenderBody()
+			</div>
+		</div>
+	</div>
+</body>
+</html>
+@functions{
+	string GetClassForButton(string controller)
+	{
+		return "btn btn-block " + (ViewContext.RouteData.Values["controller"] as string == controller ? "btn-primary" : "btn-outline-primary");
+	}
+}

@@ -1,0 +1,140 @@
+﻿@model IEnumerable<DevicePlaces>
+@if (Model != null)
+{
+
+	@foreach (DevicePlaces date_place in Model)
+	{
+		//Добавляем компоненты выбора даты для каждого выбора даты места
+		<script>
+		$(function () {
+			$("#datepicker1_@date_place.DevicePlaceId").datepicker();
+		});
+		</script>
+		<script>
+		$(function () {
+			$("#datepicker2_@date_place.DevicePlaceId").datepicker();
+		});
+		</script>
+	}
+	//Отдельно обработчики даты для добавки нового места
+	<script>
+		$(function () {
+			$("#datepicker1").datepicker();
+		});
+	</script>
+	<script>
+		$(function () {
+			$("#datepicker2").datepicker();
+		});
+	</script>
+
+	<table class="table table-bordered table-striped">
+		<thead>
+			<tr>
+				<th>
+					ИД места
+				</th>
+				<th>
+					Место
+				</th>
+				<th>
+					Начало
+				</th>
+				<th>
+					Конец
+				</th>
+				<th>
+					Направление счета
+				</th>
+				<th>
+
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			@*строка для добавления новой записи*@
+			<tr>
+				<form asp-action="UpdateDevicePlaces">
+
+					<td>
+						@{DevicePlaces new_place = new DevicePlaces();}
+						<input asp-for="@new_place.DeviceId" value="@ViewBag.Device_ID" name="place.DeviceId" hidden readonly width="1" />
+					</td>
+					<td>
+						<select asp-for="@new_place.PlaceId" name="place.PlaceId">
+							@foreach (KeyValuePair<int, string> PlaceName in ViewBag.list_of_places)
+							{
+								<option value="@PlaceName.Key">
+									@PlaceName.Value
+								</option>
+							}
+
+						</select>
+					</td>
+					<td>
+						<input type="datetime" id="datepicker1" asp-for="@new_place.BeginDateOfLocation" value="@DateTime.Now.ToShortDateString()" name="place.BeginDateOfLocation" />
+					</td>
+					<td>
+						<input  type="datetime" id="datepicker2" asp-for="@new_place.EndDateOfLocation" value="@DateTime.Now.AddYears(50).ToShortDateString()" name="place.EndDateOfLocation"/>
+
+					</td>
+					<td>
+						<input asp-for="@new_place.Multiplier" name="place.Multiplier" />
+					</td>
+					<td>
+						<button class="btn btn-outline-primary" type="submit">Добавить место</button>
+					</td>
+
+				</form>
+			</tr>
+			@*выводим все места с кнопками "Изменить место" и "Удалить"*@
+			@foreach (DevicePlaces curr_place in Model)
+			{
+				<tr>
+					<form asp-action="UpdateDevicePlaces">
+
+						<td>
+							<input name="place.DeviceId" value="@ViewBag.Device_ID" hidden readonly width="1" />
+							@curr_place.DevicePlaceId
+							<input name="place.DevicePlaceId" value="@curr_place.DevicePlaceId" hidden width="1" />
+						</td>
+						<td>
+
+							
+
+							<select id="select_@curr_place.PlaceId" asp-for="@curr_place.PlaceId" name="place.PlaceId" >
+								@foreach (KeyValuePair<int, string> PlaceName in ViewBag.list_of_places)
+								{
+									<option value="@PlaceName.Key">
+										@PlaceName.Value
+									</option>
+								}
+
+							</select>
+
+
+						</td>
+						<td>
+							<input type="datetime" id="datepicker1_@curr_place.DevicePlaceId" name="place.BeginDateOfLocation" value="@curr_place.BeginDateOfLocation.ToShortDateString()" />
+						</td>
+						<td>
+							<input type="datetime" id="datepicker2_@curr_place.DevicePlaceId" name="place.EndDateOfLocation" value="@curr_place.EndDateOfLocation.ToShortDateString()" />
+
+						</td>
+						<td>
+							<input asp-for="@curr_place.Multiplier" name="place.Multiplier" value="@curr_place.Multiplier" />
+						</td>
+						<td>
+							<button class="btn btn-outline-primary" type="submit">Изменить место</button>
+
+						</td>
+						<td><a class="btn btn-outline-secondary" asp-action="DeleteDevicePlace" asp-route-key="@curr_place.DevicePlaceId">Удалить</a></td>
+					</form>
+
+				</tr>
+
+			}
+		</tbody>
+	</table>
+
+}

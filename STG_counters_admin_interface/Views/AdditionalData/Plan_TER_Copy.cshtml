@@ -1,0 +1,21 @@
+﻿@if (ViewBag.Message_text != null)
+{
+	<h2 class="text-center" style="color:@ViewBag.Message_color"> @Html.Raw(ViewBag.Message_text)</h2>
+	<br />
+}
+
+<h2 style="color:red">Внимание! Данные куда будут копироватся план, будут перезаписаны если существуют! Внимательно заполняйте назначение</h2>
+<form asp-action="CopyPlan">
+	<input  name="copy_full_Year" id="copy_full_Year" type="checkbox"  /><label>Копируем весь год</label><br />
+	<label>Копируем откуда:</label>
+	<br />
+	@Html.PartialAsync("Selecter_Year_SKU_BDM").Result
+	<br />
+	<br />
+	<label>Копируем куда:</label>
+	<br />
+	@Html.PartialAsync("Selecter_Year_SKU_BDM_CopyTo").Result
+	<br />
+	<br />
+	<button class="btn btn-primary">Скопировать</button>
+</form>

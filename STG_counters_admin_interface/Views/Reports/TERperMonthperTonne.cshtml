@@ -1,0 +1,475 @@
+﻿@model ReportInfo
+@using Microsoft.AspNetCore.Html;
+@using Microsoft.AspNetCore.Mvc.Rendering;
+@using System.Globalization;
+@using static STG_counters_admin_interface.Models.StaticMethods
+@using static STG_counters_admin_interface.Models.Constants
+@using System.Reflection;
+@{ /**/
+				  bool isCurrYear = (Model.ReportDates.TesYear == DateTime.Now.Year) ? true : false;
+				//Если текущий год выводится для отчета то рисуем до текущего месяца, иначе весь год
+				int max_month = isCurrYear ? DateTime.Now.Month : 12;}
+@{	var TER_fact = Model.Records_List["TERperMonthperTonne"].Select(r=>(TERperMonthperTonne)r);
+	var curr_cycles = Model.Records_List["TERperCycleperTonne"].Select(r => (TERperCycleperTonne)r);
+	var TER_Plan = Model.Records_List["TER_Plan"].Select(r => (TERperMonthperTonne)r);
+	int count_col_per_sku = 5;
+	var isNull = true;
+	var isNullSec = true;}
+Посмотреть отчет для другого года с теми же SKU
+@* Сразу добавим обработчик на селект *@
+<script type="text/javascript">fireSubmit = function (event) { document.forms["SortOfProdForm"].submit(); }</script>
+<form asp-action="ShowReport" name="SortOfProdForm">
+	@Html.PartialAsync("ReportParams").Result
+
+	@{var selYears = new List<string>();
+
+		for (int i = 0; i < 5; i++)
+		{
+			selYears.Add(DateTime.Now.AddYears(-i).Year.ToString());
+
+		}
+		//Реализуем через select через метод потому что свойство selected почему то нельзя записать напрямую через c# код внутри тега
+		ViewContext.Writer.Write(StaticMethods.WriteSelect(selYears, "tesYear", (Model.ReportDates.TesYear.ToString())));}
+
+</form>
+
+<h2> @Model.ReportName.Rus </h2>
+<h4>Год отчета @Model.ReportDates.TesYear</h4>
+<h4> Период для сбора наменклатур и данных для текущего периода с @Model.ReportDates.StartDate.ToShortDateString() @Model.ReportDates.StartDate.ToLongTimeString() по @Model.ReportDates.EndDate.ToShortDateString() @Model.ReportDates.EndDate.ToLongTimeString() </h4>
+@Html.PartialAsync("ExcelExport").Result
+
+<table class="table table-bordered table-striped">
+	<thead class="text-center">
+		<tr>
+			<th>
+
+			</th>
+			<th>
+
+			</th>
+			<th>
+
+			</th>
+			<th colspan="6">
+				@{var start_month_name = @isCurrYear ? "Показатели с начала месяца" : CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(12);}
+				@start_month_name
+			</th>
+			@for (int i = max_month - 1; i > 0; i--)
+			{
+				<th colspan="6">
+					@CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i)
+				</th>
+			}
+			<th colspan="6">
+				Итого средняя за год(истекший период)
+			</th>
+			<th colspan="6">
+				Бюджет @Model.ReportDates.TesYear года(исходные табличные данные)
+			</th>
+			<th colspan="6">
+				Отклонение от бюджета
+			</th>
+		</tr>
+		<tr>
+
+			<th>
+				Передел
+			</th>
+			<th>
+				Номенклатура
+			</th>
+			<th>
+				Текущие показатели
+			</th>
+			@*Рисуем показатели для всех месяцов +(ср. итого, бюджет, отклонение от бюджета)*@
+			@for (int i = max_month + 3; i > 0; i--)
+			{
+				<th>
+					Объем БО тонн
+				</th>
+				<th>
+					Средняя скорость м/мин
+				</th>
+				<th>
+					Энергоемкость МВт* ч/тонна
+				</th>
+				<th>
+					Потребление газа тыс м3 /тонна
+				</th>
+				<th>
+					Потребление пара ГКал/тонна
+				</th>
+				<th></th>
+			}
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in TER_fact.Select(r => new { r.SKU, r.PlaceID, r.PlaceName }).Distinct())
+		{
+			<tr>
+				<td>
+					@item.PlaceName
+				</td>
+				<td>
+					@item.SKU
+				</td>
+				<td>
+					<table>
+
+						<thead class="text-center">
+						<th>
+							Начало цикла производства
+						</th>
+						<th>
+							Конец цикла производства
+						</th>
+						<th>
+							Объем БО тонн
+						</th>
+						<th>
+							Средняя скорость м/мин
+						</th>
+						<th>
+							Энергоемкость МВт* ч/тонна
+						</th>
+						<th>
+							Потребление газа тыс м3 /тонна
+						</th>
+						<th>
+							Потребление пара ГКал/тонна
+						</th>
+						</thead>
+						<tbody>
+							@foreach (var curr_cycle in curr_cycles.Where(r => r.SKU == @item.SKU && r.PlaceID == @item.PlaceID))
+							{
+								<tr>
+									<td>
+										@curr_cycle.CycleDateBegin
+									</td>
+									<td>
+										@curr_cycle.CycleDateEnd
+									</td>
+									<td>
+										@curr_cycle.ValueOfBO
+									</td>
+									<td>
+										@curr_cycle.AverageSpeed
+									</td>
+									<td>
+										@curr_cycle.EnegryConsumptionperTonne
+									</td>
+									<td>
+										@curr_cycle.GasConsumptionperTonne
+									</td>
+									<td>
+										@curr_cycle.SteamConsumptionperTonne
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</td>
+
+				@for (int curr_month = max_month; curr_month > 0; curr_month--)
+				{
+					//Получем строку с параметрами за нужный нам месяц по SKU
+					var curr_record = TER_fact.Where(r => r.SKU == @item.SKU
+					&& r.PlaceID == @item.PlaceID
+					&& r.Month == curr_month).FirstOrDefault();
+
+					ViewContext.Writer.Write(
+
+					@StaticMethods.gen_sku_cells(curr_record, count_col_per_sku));
+
+
+
+
+				}
+
+				@{var total_period_record = TER_fact.Where(r => r.SKU == item.SKU
+									&& r.PlaceID == item.PlaceID
+									&& r.Month == 13).FirstOrDefault();
+					ViewContext.Writer.Write(StaticMethods.gen_sku_cells(total_period_record, count_col_per_sku));
+
+
+					var total_period_record_plan = TER_Plan.Where(r => r.SKU == item.SKU
+					&& r.PlaceID == item.PlaceID
+					&& r.Month <= max_month).GroupBy(r => new { r.PlaceID, r.SKU, r.PlaceName }, (g, r) => new TER_SKU_cells
+					{
+						ValueOfBO = r.Sum(e => e.ValueOfBO),
+						AverageSpeed = r.Average(e => e.AverageSpeed),
+						EnegryConsumptionperTonne = r.Average(e => e.EnegryConsumptionperTonne),
+						GasConsumptionperTonne = r.Average(e => e.GasConsumptionperTonne),
+						PlaceName = g.PlaceName,
+						SteamConsumptionperTonne = r.Average(e => e.SteamConsumptionperTonne)
+					})
+
+						.FirstOrDefault();
+					ViewContext.Writer.Write(StaticMethods.gen_sku_cells(total_period_record_plan, count_col_per_sku));
+
+					var diff_total_period_record = new TERperMonthperTonne();
+
+					isNull = total_period_record_plan == null ? true : false;
+					isNullSec = total_period_record == null ? true : false;
+
+					diff_total_period_record.ValueOfBO = Math.Round(isNull ? 0 : total_period_record_plan.ValueOfBO - (isNullSec ? 0 : total_period_record.ValueOfBO), 3);
+					diff_total_period_record.AverageSpeed = Math.Round(isNull ? 0 : total_period_record_plan.AverageSpeed - (isNullSec ? 0 : total_period_record.AverageSpeed), 3);
+					diff_total_period_record.EnegryConsumptionperTonne = Math.Round(isNull ? 0 : total_period_record_plan.EnegryConsumptionperTonne - (isNullSec ? 0 : total_period_record.EnegryConsumptionperTonne), 3);
+					diff_total_period_record.GasConsumptionperTonne = Math.Round(isNull ? 0 : total_period_record_plan.GasConsumptionperTonne - (isNullSec ? 0 : total_period_record.GasConsumptionperTonne), 3);
+					diff_total_period_record.SteamConsumptionperTonne = Math.Round(isNull ? 0 : total_period_record_plan.SteamConsumptionperTonne - (isNullSec ? 0 : total_period_record.SteamConsumptionperTonne), 3);
+					ViewContext.Writer.Write(StaticMethods.gen_sku_cells(diff_total_period_record, count_col_per_sku));
+				}
+				@*</span>*@
+			</tr>
+		}
+
+	</tbody>
+</table>
+@*<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>*@
+@{int chart_index = 0;
+	//Нужно для получения числа double с точкой
+	var culture = CultureInfo.CreateSpecificCulture("en-CA");}
+<table class="table-bordered">
+
+	@foreach (var item in TER_fact.Select(r => new { r.SKU, r.PlaceName, r.PlaceID }).Distinct())
+	{
+		<tr>
+			<td>
+				@item.PlaceName
+			</td>
+			<td>
+				@item.SKU
+			</td>
+			@{List<double> mins_TER;
+				List<double> maxs_TER;
+				//формируем минимумы и максимумы для ТЭР из факта и плана чтобы ограничивать ось графиков
+				TERperMonthperTonne_min_max(TER_Plan.Where(r => r.SKU == @item.SKU
+				&& r.PlaceID == @item.PlaceID)
+					.ToList(), out mins_TER, out maxs_TER);}
+			@for (int i = 1; i < count_col_per_sku + 1; i++)
+			{
+
+				//Берем поля для которых отбражаем графики
+				var fInfo = typeof(TERperMonthperTonne)
+					.GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)
+					.Where(f => TERperMonthperTonne_graph_fields_list.Contains(GetFieldName(f)));
+
+				string data_string_fakt = "";
+				string data_string_plan = "";
+				string label_string = " ";
+				//string data_string_BO = "";
+				//string data_string_avr_speed = "";
+				//string data_string_energy = "";
+				//string data_string_gas = "";
+				//string data_string_steam = "";
+				string months_list = "";
+				string colors_list = "";
+
+				switch (i)
+				{
+					case 1:
+						label_string = "Объем БО тонн";
+						break;
+					case 2:
+						label_string = "Средняя скорость м/мин";
+						break;
+					case 3:
+						label_string = "Энергоемкость МВт*ч/тонна";
+						break;
+					case 4:
+						label_string = "Потребление газа тыс м3 /тонна";
+						break;
+					case 5:
+
+						label_string = "Потребление пара ГКал/тонна";
+						break;
+
+					default:
+						break;
+				}
+				label_string += "(кр.-факт,син.-план)";
+				@for (int curr_month = max_month; curr_month > 0; curr_month--)
+				{
+
+
+
+					//months_list = months_list + @"""" + @CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(curr_month) + @""",";
+					//Рисуем диаграммы для факта и для плана, план - синий, факт - красный
+					//colors_list = colors_list + @"""" + "red" + @""",";
+					//colors_list = colors_list + @"""" + "blue" + @""",";
+					//Получем строку с параметрами за нужный нам месяц по SKU
+					var curr_record = TER_fact.Where(r => r.SKU == @item.SKU
+					&& r.PlaceID == @item.PlaceID
+					&& r.Month == curr_month).FirstOrDefault();
+					if (curr_record == null) { continue; }
+					if ((double)fInfo.Where(field => GetFieldName(field) == TERperMonthperTonne_graph_fields_list[i - 1]).FirstOrDefault().GetValue(curr_record) == 0)
+					{
+						continue;
+					}
+					//добавляем по ней данные
+					data_string_fakt = StaticMethods.append_data_string(data_string_fakt, curr_record, i, count_col_per_sku, culture);
+					//Получем строку с параметрами за нужный нам месяц по плану
+					curr_record = TER_Plan.Where(r => r.SKU == @item.SKU
+					&& r.PlaceID == @item.PlaceID
+					&& r.Month == curr_month).FirstOrDefault();
+
+					data_string_plan = StaticMethods.append_data_string(data_string_plan, curr_record, i, count_col_per_sku, culture);
+					//для два столбаца требуют два одинаковых месяца
+					months_list = months_list + @"""" + @CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(curr_month) + @""",";
+
+				}
+				//объем БО график стартует с ноля, для остальных делаем обрезку в пределах мин макс данных и факту
+				string scales;
+				double diff_down = 0.75;
+				double diff_up = 1.25;
+				
+				if (TERperMonthperTonne_graph_fields_list[i - 1] != "ValueOfBO")
+				{
+					if (mins_TER.Count>0&&maxs_TER.Count>0)
+					{
+
+					
+					
+						scales = @"scales: {
+								yAxes: [{
+									ticks: {
+										min: " + (mins_TER[i - 1] * diff_down).ToString(culture) + @",
+										max: " + (maxs_TER[i - 1] * diff_up).ToString(culture) + @"
+									}
+								}]
+							},";
+					}
+					else
+					{
+				
+						scales = "";
+					}
+
+				}
+				else
+				{
+
+					scales = @"scales:
+				{
+				yAxes: [{
+					ticks:
+						{
+						beginAtZero: true
+								 }
+					}]
+				 },";
+				}
+				data_string_fakt = data_string_fakt!=""?data_string_fakt.Remove(data_string_fakt.Length - 1):"";
+				data_string_plan = data_string_plan!=""?data_string_plan.Remove(data_string_plan.Length - 1):"";
+				months_list = months_list!=""? months_list.Remove(months_list.Length - 1):"";
+				//colors_list = colors_list.Remove(colors_list.Length - 1);
+				chart_index++;
+
+		<td width="200">
+			
+			<canvas id=@chart_index.ToString() height="200"></canvas>
+			<script>
+				var newChar = new Chart(document.getElementById("@chart_index.ToString()"),
+						{
+				type: 'line',
+				data: {
+					labels: [@Html.Raw(months_list)],
+					datasets: [
+
+							{
+							label: "@Html.Raw(label_string)",
+							backgroundColor: [@Html.Raw(@colors_list)],
+							data: [@data_string_fakt],
+							fill: false,
+							borderColor: "red",
+							lineTension: 0.1
+
+						},
+						{
+							label: "@Html.Raw(label_string)",
+							backgroundColor: [@Html.Raw(@colors_list)],
+							data: [@data_string_plan],
+							fill: false,
+							borderColor: "blue",
+							lineTension: 0.1
+
+						},
+					]
+						},
+							options: {
+								@Html.Raw(scales)
+					//scales: {
+					// yAxes: [{
+					//	 ticks: {
+					//		 beginAtZero: true
+					//			 }
+					//		 }]
+					// },
+					legend:
+								{
+									display: false
+
+
+							},
+					title: {
+					display: true,
+					text: '@Html.Raw(label_string)'
+
+								},
+								tooltips: {
+									visible: false,
+									callbacks: {
+
+										label : function (tooltipItem, data) {
+											//Получаем процентаж
+											var value = '';
+											if (tooltipItem.datasetIndex == 0) {
+												var firstIndex = 1;
+												var secIndex = 0;
+												value = 'разница в % от плана: ';
+											}
+
+												if (tooltipItem.datasetIndex == 1) {
+												var firstIndex = 0;
+												var secIndex = 1;
+												value = 'разница в % от факта: ';
+
+											}
+
+											if (data.datasets[firstIndex].data[tooltipItem.index] != 0) {
+												value += (((data.datasets[secIndex].data[tooltipItem.index] - data.datasets[firstIndex].data[tooltipItem.index]) / data.datasets[firstIndex].data[tooltipItem.index]) * 100).toFixed(3);
+											}
+											else value += '0.0';
+
+
+											return value;
+										}
+									}
+								}
+						}
+					});
+
+			</script>
+		</td>
+
+			}
+		</tr>
+	}
+	<script>
+		//window.onloadend = fillInputs();
+		//Ждем пока загрузятся картинки и потом подгружаем их коды в форму
+		setTimeout(fillInputs, 3000);
+		function fillInputs() {
+			for (var id in Chart.instances) {
+				var input = document.createElement("input");
+				input.value = Chart.instances[id].toBase64Image();
+				input.hidden = true;
+				input.name = "baseStrings";
+
+				document.getElementById("excelForm").appendChild(input);
+			}
+		}
+
+	</script>
+</table>
+

@@ -1,0 +1,98 @@
+﻿@using System.Reflection
+@using static STG_counters_admin_interface.Models.Constants
+@model List<StgPlanTer>
+
+@{
+	var startDisplayColumn = 5;//Номер члена класса StgPlanTer  с которой начинается отображение в таблице
+	var columns_head_list = Plan_TER_columns_head_list;
+
+
+	//Собираем иноформацию о членов класса переданном в перечислителе
+	FieldInfo[] myFieldInfo = typeof(StgPlanTer).GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
+
+	//Собираем имена для input для колонок
+	var columns_names_list = typeof(StgPlanTer).GetProperties().Select(f => f.Name).ToList();
+	var sku = (string)ViewBag.sku;
+
+
+}
+@{int i = 0;}
+<h3>Номенклатура: @ViewBag.sku</h3>
+<h3>Передел: @((string)ViewData["PlaceName"])</h3>
+<h3>Год: @ViewBag.year</h3>
+<br />
+
+@if (ViewBag.Message_text != null)
+{
+	<h2 class="text-center" style="color:@ViewBag.Message_color"> @ViewBag.Message_text</h2>
+}
+
+<form method="post" asp-action="Plan_TER_Update">
+
+	@*<button )">AutoFill</button>*@
+	<table class="table table-bordered table-striped">
+		<thead class="text-center">
+			@foreach (var item in columns_head_list)
+			{
+			<th>@item</th>
+		}
+			</thead>
+			<tbody>
+				<tr>
+					<td>Автозаполнение</td>
+
+
+					@for (int c = startDisplayColumn; c < columns_names_list.Count; c++)
+					{
+						<td><input onkeyup="autoFill('item_@columns_names_list[c]', this.value)" id='autoFill_@columns_names_list[c]' /></td>
+					}
+
+
+				</tr>
+				@*Для того чтобы передать в контроллер массив List <StgSkuPlanTer>
+					, нужно элемент	класса оформлять ввиде [@i]. где i от 0 и до размера List*@
+				@foreach (var item in Model)
+				{
+					<tr>
+
+						<td>
+
+							<input name="[@i].Year" asp-for="@item.Year" hidden />
+							<input name="[@i].Sku" asp-for="@sku" hidden />
+							<input name="[@i].Month" asp-for="@item.Month" hidden />
+							<input name="[@i].PlaceId" asp-for="@ViewData["PlaceId"]" hidden />
+
+							@item.Month
+						</td>
+
+						@for (int c = startDisplayColumn; c < columns_names_list.Count; c++)
+						{
+							<td>
+								<input id="item_@columns_names_list[c]" name="[@i].@columns_names_list[c]" value=@myFieldInfo[c].GetValue(item) />
+							</td>
+
+						}
+
+						@{i++;}
+					</tr>
+				}
+
+			</tbody>
+
+
+
+		</table>
+		<button type="submit" class="btn btn-primary"> Отправить</button>
+		<br />
+	</form>
+	<script>
+		autoFill = function (columnId, columnValue) {
+			let inputs = document.getElementsByTagName('input');
+
+			for (let input of inputs) {
+				if (input.id == columnId) {
+					input.value = columnValue;
+				}
+			}
+		}
+	</script>
